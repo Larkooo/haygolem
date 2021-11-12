@@ -7,7 +7,7 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 
-public class HayGolemEntity extends EntityGolem {
+public class HayGolemEntity extends EntityIronGolem {
     @Nullable
     Farm farm;
 
