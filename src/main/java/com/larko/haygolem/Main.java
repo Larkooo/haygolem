@@ -1,14 +1,13 @@
 package com.larko.haygolem;
 
-import net.minecraft.init.Blocks;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = HayGolem.MODID, name = HayGolem.NAME, version = HayGolem.VERSION)
-public class HayGolem
+@Mod(modid = Main.MODID, name = Main.NAME, version = Main.VERSION)
+public class Main
 {
     public static final String MODID = "haygolem";
     public static final String NAME = "Hay Golem";
@@ -26,6 +25,6 @@ public class HayGolem
     public void init(FMLInitializationEvent event)
     {
         // some example code
-        logger.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
+        logger.info("initialized");
     }
 }
