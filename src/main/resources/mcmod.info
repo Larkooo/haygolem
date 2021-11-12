@@ -1,0 +1,16 @@
+[
+{
+  "modid": "haygolem",
+  "name": "Hay Golem",
+  "description": "Example placeholder mod.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Larko"],
+  "credits": "Larko",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
