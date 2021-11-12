@@ -1,19 +1,25 @@
 package com.larko.haygolem;
 
+import com.larko.haygolem.Proxy.CommonProxy;
+import com.larko.haygolem.Util.Metadata;
+
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = Main.MODID, name = Main.NAME, version = Main.VERSION)
+@Mod(modid = Metadata.MODID, name = Metadata.NAME, version = Metadata.VERSION)
 public class Main
 {
-    public static final String MODID = "haygolem";
-    public static final String NAME = "Hay Golem";
-    public static final String VERSION = "1.0";
+    @Mod.Instance
+    public static Main instance;
 
     private static Logger logger;
+
+    @SidedProxy(clientSide = Metadata.CLIENT_PROXY, serverSide = Metadata.SERVER_PROXY)
+    public static CommonProxy commonProxy;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)

@@ -2,6 +2,8 @@ package com.larko.haygolem.Managers;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHay;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -17,6 +19,9 @@ public class GolemManager {
     //  -
     @SubscribeEvent
     public void onPlaceEvent(BlockEvent.EntityPlaceEvent event) {
+        if (!(event.getEntity() instanceof EntityPlayerSP))
+            return;
+
         Block placedBlock = event.getPlacedBlock().getBlock();
         if (!(placedBlock instanceof BlockHay))
             return;
