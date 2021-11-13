@@ -45,4 +45,6 @@ public class RegistryHandler {
         // register haygolem renderer
         RenderingRegistry.registerEntityRenderingHandler(HayGolemEntity.class, HayGolemRenderer::new);
     }
+
+
 }

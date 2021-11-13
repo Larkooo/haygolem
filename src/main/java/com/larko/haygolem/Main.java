@@ -8,6 +8,7 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 import org.apache.logging.log4j.Logger;
 
 @Mod(modid = Metadata.MODID, name = Metadata.NAME, version = Metadata.VERSION)
@@ -31,6 +32,7 @@ public class Main
     public void init(FMLInitializationEvent event)
     {
         // some example code
+        //NetworkRegistry.INSTANCE.registerGuiHandler(Metadata.MODID, );
         logger.info("initialized");
     }
 }
