@@ -30,6 +30,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mod.EventBusSubscriber
@@ -43,7 +44,7 @@ public class GolemManager {
             .where('~', BlockWorldState.hasState(BlockMaterialMatcher.forMaterial(Material.AIR)))
             .build();
 
-    private static List<HayGolemEntity> entities;
+    private static ArrayList<HayGolemEntity> entities = new ArrayList<>();
     // spawn a golem if structure
     // has been constructed
     //  - (hay)
@@ -77,9 +78,9 @@ public class GolemManager {
         }
 
         BlockPos blockpos = patternHelper.translateOffset(1, 2, 0).getPos();
-        HayGolemEntity hayGolemEntity = new HayGolemEntity(worldIn);
-        hayGolemEntity.setLocationAndAngles((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.05D, (double)blockpos.getZ() + 0.5D, 0.0F, 0.0F);
-        worldIn.spawnEntity(hayGolemEntity);
+        entities.add(new HayGolemEntity(worldIn));
+        entities.get(entities.size() - 1).setLocationAndAngles((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.05D, (double)blockpos.getZ() + 0.5D, 0.0F, 0.0F);
+        worldIn.spawnEntity(entities.get(entities.size() - 1));
 //        for (EntityPlayerMP entityplayermp1 : worldIn.getEntitiesWithinAABB(EntityPlayerMP.class, hayGolemEntity.getEntityBoundingBox().grow(5.0D)))
 //        {
 //            CriteriaTriggers.SUMMONED_ENTITY.trigger(entityplayermp1, hayGolemEntity);
