@@ -1,6 +1,7 @@
 package com.larko.haygolem.Renderers;
 
 import com.larko.haygolem.Entity.HayGolemEntity;
+import com.larko.haygolem.Model.HayGolemModel;
 import net.minecraft.client.model.ModelIronGolem;
 import net.minecraft.client.renderer.entity.RenderIronGolem;
 import net.minecraft.client.renderer.entity.RenderLiving;
@@ -16,7 +17,7 @@ public class HayGolemRenderer extends RenderLiving<HayGolemEntity> {
     public HayGolemRenderer(RenderManager manager)
     {
         // same model as iron golem
-        super(manager, new ModelIronGolem(), 0.5f);
+        super(manager, new HayGolemModel(), 0.5f);
     }
 
     @Nullable

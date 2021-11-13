@@ -7,9 +7,10 @@ public class Farm {
     private int size;
     
 
-    public Farm()
+    public Farm(BlockPos position, int size)
     {
-
+        this.position = position;
+        this.size = size;
     }
 
 
