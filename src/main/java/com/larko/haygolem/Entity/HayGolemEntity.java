@@ -26,13 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class HayGolemEntity extends EntityGolem implements net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound>/*implements net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound>*/ {
-    public enum Status
-    {
-        SEARCHING_FARM,
-        IDLING
-    }
-
+public class HayGolemEntity extends EntityGolem implements net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound> {
     public static final int CAPACITY = 27;
     public static final List<Item> USABLE_TOOLS = Arrays.asList(
             Items.WOODEN_HOE,
@@ -42,13 +36,10 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
             Items.DIAMOND_HOE
     );
 
-    private Status status = Status.SEARCHING_FARM;
-
     @Nullable
     public Farm farm;
 
     private InventoryBasic inventory;
-    //public ItemStackHandler inventory = new ItemStackHandler(36);
 
     public HayGolemEntity(World worldIn)
     {
