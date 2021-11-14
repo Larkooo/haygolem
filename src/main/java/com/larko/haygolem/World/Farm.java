@@ -42,14 +42,24 @@ public class Farm {
     public boolean isWithinBounds(BlockPos pos)
     {
         Vec3i endingPos = startingPos.add(this.size);
-        return pos.getX() >= startingPos.getX() &&
-                pos.getX() <= endingPos.getX() &&
+        // if size is negative, then the position should be bigger than the ending pos
+        return (size.getX() < 0 ?
+                pos.getX() <= startingPos.getX() &&
+                    pos.getX() >= endingPos.getX()
+                : pos.getX() >= startingPos.getX() &&
+                    pos.getX() <= endingPos.getX()) &&
 
-                pos.getY() >= startingPos.getY() &&
-                pos.getY() <= endingPos.getY() &&
+                (size.getY() < 0 ?
+                pos.getY() <= startingPos.getY() &&
+                        pos.getY() >= endingPos.getY()
+                : pos.getY() >= startingPos.getY() &&
+                    pos.getY() <= endingPos.getY()) &&
 
-                pos.getZ() >= startingPos.getZ() &&
-                pos.getZ() <= endingPos.getZ();
+                (size.getZ() < 0 ?
+                    pos.getZ() <= startingPos.getZ() &&
+                        pos.getZ() >= endingPos.getZ()
+                    : pos.getZ() >= startingPos.getZ() &&
+                        pos.getZ() <= endingPos.getZ());
     }
 
     public UUID getUuid()

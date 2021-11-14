@@ -1,9 +1,8 @@
-package com.larko.haygolem.Renderers;
+package com.larko.haygolem.Graphics.Renderers;
 
 import com.larko.haygolem.Entity.HayGolemEntity;
-import com.larko.haygolem.Model.HayGolemModel;
-import net.minecraft.client.model.ModelIronGolem;
-import net.minecraft.client.renderer.entity.RenderIronGolem;
+import com.larko.haygolem.Graphics.Layers.HayGolemHeldItemLayer;
+import com.larko.haygolem.Graphics.Models.HayGolemModel;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.layers.LayerHeldItem;
@@ -20,7 +19,7 @@ public class HayGolemRenderer extends RenderLiving<HayGolemEntity> {
         // same model as iron golem
         super(manager, new HayGolemModel(), 0.5f);
         // TODO: show held item, make custom layer
-        //this.addLayer(new LayerHeldItem(this));
+        this.addLayer(new HayGolemHeldItemLayer(this));
     }
 
     @Nullable

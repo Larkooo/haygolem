@@ -1,4 +1,4 @@
-package com.larko.haygolem.Entity;
+package com.larko.haygolem.Entity.AI;
 
 import com.larko.haygolem.Entity.HayGolemEntity;
 import com.larko.haygolem.Managers.FarmManager;
@@ -7,6 +7,9 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class HayGolemSearchFarmAI extends EntityAIBase
 {
@@ -54,7 +57,7 @@ public class HayGolemSearchFarmAI extends EntityAIBase
         {
             ++this.timeoutCounter;
 
-            if (this.timeoutCounter % 40 == 0)
+            if (this.timeoutCounter % 5 == 0)
             {
                 BlockPos dest = this.hayGolem.farm.getCenter();
                 this.hayGolem.getNavigator().tryMoveToXYZ((double)((float)dest.getX()) + 0.5D, (double)(dest.getY() + 1), (double)((float)dest.getZ()) + 0.5D, this.movementSpeed);
@@ -70,13 +73,33 @@ public class HayGolemSearchFarmAI extends EntityAIBase
 
     private boolean searchForDestination()
     {
-        for (Farm farm : FarmManager.farms)
+        if (FarmManager.farms.size() == 0)
+            return false;
+
+        Farm closest = FarmManager.farms.get(0);
+
+        for (int i = 1; i < FarmManager.farms.size(); i++)
         {
-            if (this.hayGolem.getDistance(farm.getCenter().getX(), farm.getCenter().getY(), farm.getCenter().getZ()) < searchLength)
-            {
-                this.hayGolem.farm = farm;
-                return true;
-            }
+            Farm farm = FarmManager.farms.get(i);
+            double dist = this.hayGolem.getDistance(
+                    farm.getCenter().getX(),
+                    farm.getCenter().getY(),
+                    farm.getCenter().getZ());
+
+            if (this.hayGolem.getDistance(
+                    closest.getCenter().getX(),
+                    closest.getCenter().getY(),
+                    closest.getCenter().getZ()) > dist)
+                closest = FarmManager.farms.get(i);
+        }
+
+        if (this.hayGolem.getDistance(
+                closest.getCenter().getX(),
+                closest.getCenter().getY(),
+                closest.getCenter().getZ()) < this.searchLength)
+        {
+            this.hayGolem.farm = closest;
+            return true;
         }
 
         return false;

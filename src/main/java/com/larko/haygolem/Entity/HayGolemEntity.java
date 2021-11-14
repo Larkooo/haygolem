@@ -1,33 +1,18 @@
 package com.larko.haygolem.Entity;
 
+import com.larko.haygolem.Entity.AI.HayGolemSearchFarmAI;
 import com.larko.haygolem.Managers.FarmManager;
 import com.larko.haygolem.World.Farm;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockCarrot;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIMoveToBlock;
-import net.minecraft.entity.ai.EntityMoveHelper;
+import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.monster.EntityGolem;
-import net.minecraft.entity.monster.EntityIronGolem;
-import net.minecraft.entity.monster.EntitySnowman;
-import net.minecraft.entity.passive.EntityRabbit;
-import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -44,9 +29,9 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
     public static final int CAPACITY = 27;
     public static final List<Item> USABLE_TOOLS = Arrays.asList(
             Items.WOODEN_HOE,
+            Items.GOLDEN_HOE,
             Items.STONE_HOE,
             Items.IRON_HOE,
-            Items.GOLDEN_HOE,
             Items.DIAMOND_HOE
     );
 
@@ -77,6 +62,7 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
         super.initEntityAI();
         //this.tasks.addTask(1, new HayGolemHarvestAI(this, 0.4f));
         this.tasks.addTask(0, new HayGolemSearchFarmAI(this, 0.4f, 200));
+        //this.tasks.addTask(1, new EntityAIWander(this, 0.4f));
     }
 
     @Override
@@ -106,6 +92,30 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
         return this.inventory;
     }
 
+    public ItemStack hasToolInInventory()
+    {
+        ItemStack bestTool = null;
+
+        for (int i = 0; i < inventory.getSizeInventory(); i++)
+        {
+            ItemStack itemstack = this.inventory.getStackInSlot(i);
+            if (itemstack.isEmpty() || !USABLE_TOOLS.contains(itemstack.getItem()))
+                continue;
+
+
+            if (bestTool == null)
+            {
+                bestTool = itemstack;
+                continue;
+            }
+
+            if (USABLE_TOOLS.indexOf(itemstack.getItem()) > USABLE_TOOLS.indexOf(bestTool.getItem()))
+                bestTool = itemstack;
+        }
+
+        return bestTool;
+    }
+
     public boolean isFarmItemInInventory()
     {
         for (int i = 0; i < this.inventory.getSizeInventory(); ++i)
@@ -123,17 +133,11 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
 
     public void onInventoryChange()
     {
-        for (int i = 0; i < inventory.getSizeInventory(); i++)
-        {
-            ItemStack itemStack = inventory.getStackInSlot(i);
-            
-            if (USABLE_TOOLS.contains(itemStack.getItem()))
-                if (this.getHeldItemMainhand().getItem() != itemStack.getItem())
-                    this.setHeldItem(EnumHand.MAIN_HAND, itemStack);
-            else
-                if (this.getHeldItemMainhand().getItem() == itemStack.getItem())
-                    this.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(Items.AIR));
-        }
+        ItemStack tool = hasToolInInventory();
+        if (tool == null)
+            return;
+
+        this.setHeldItem(EnumHand.MAIN_HAND, tool);
     }
 
     @Override

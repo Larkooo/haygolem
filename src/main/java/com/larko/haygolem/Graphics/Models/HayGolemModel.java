@@ -1,4 +1,4 @@
-package com.larko.haygolem.Model;
+package com.larko.haygolem.Graphics.Models;
 
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
@@ -10,7 +10,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class HayGolemModel extends ModelBiped
+public class HayGolemModel extends ModelBase
 {
     public ModelRenderer hayGolemHead;
     public ModelRenderer hayGolemBody;
