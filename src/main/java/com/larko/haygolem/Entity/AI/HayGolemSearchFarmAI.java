@@ -30,13 +30,21 @@ public class HayGolemSearchFarmAI extends EntityAIBase
 
     public boolean shouldExecute()
     {
-        this.runDelay = 200 + this.hayGolem.getRNG().nextInt(200);
-        return this.hayGolem.farm != null || this.searchForDestination();
+        if (this.runDelay > 0)
+        {
+            --this.runDelay;
+            return false;
+        }
+        else
+        {
+            this.runDelay = 200 + this.hayGolem.getRNG().nextInt(200);
+            return (this.hayGolem.farm != null && !this.hayGolem.farm.isWithinBounds(this.hayGolem.getPosition())) || this.searchForDestination();
+        }
     }
 
     public boolean shouldContinueExecuting()
     {
-        return this.timeoutCounter >= -this.maxStayTicks && this.timeoutCounter <= 1200 && this.hayGolem.farm != null;
+        return this.timeoutCounter >= -this.maxStayTicks && this.timeoutCounter <= 1200 && this.hayGolem.farm != null && !this.hayGolem.farm.isWithinBounds(this.hayGolem.getPosition());
     }
 
     public void startExecuting()

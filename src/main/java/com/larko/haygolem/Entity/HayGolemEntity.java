@@ -1,5 +1,6 @@
 package com.larko.haygolem.Entity;
 
+import com.larko.haygolem.Entity.AI.HayGolemHarvestAI;
 import com.larko.haygolem.Entity.AI.HayGolemSearchFarmAI;
 import com.larko.haygolem.Managers.FarmManager;
 import com.larko.haygolem.World.Farm;
@@ -62,7 +63,8 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
         super.initEntityAI();
         //this.tasks.addTask(1, new HayGolemHarvestAI(this, 0.4f));
         this.tasks.addTask(0, new HayGolemSearchFarmAI(this, 0.4f, 200));
-        //this.tasks.addTask(1, new EntityAIWander(this, 0.4f));
+        this.tasks.addTask(1, new HayGolemHarvestAI(this,  0.4f));
+        //this.tasks.addTask(2, new EntityAIWander(this, 0.4f));
     }
 
     @Override

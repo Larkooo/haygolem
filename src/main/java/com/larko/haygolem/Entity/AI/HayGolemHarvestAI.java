@@ -41,12 +41,12 @@ public class HayGolemHarvestAI extends EntityAIMoveToBlock
             this.wantsToReapStuff = true;
         }
 
-        return super.shouldExecute();
+        return this.hayGolem.farm != null && super.shouldExecute();
     }
 
     public boolean shouldContinueExecuting()
     {
-        return this.currentTask >= 0 && super.shouldContinueExecuting();
+        return this.hayGolem.farm != null && this.currentTask >= 0 && super.shouldContinueExecuting();
     }
 
     public void updateTask()
@@ -127,7 +127,7 @@ public class HayGolemHarvestAI extends EntityAIMoveToBlock
     {
         Block block = worldIn.getBlockState(pos).getBlock();
 
-        if (block == Blocks.FARMLAND)
+        if (this.hayGolem.farm.isWithinBounds(pos.up()) && block == Blocks.FARMLAND)
         {
             pos = pos.up();
             IBlockState iblockstate = worldIn.getBlockState(pos);
