@@ -1,5 +1,6 @@
 package com.larko.haygolem;
 
+import com.larko.haygolem.Managers.FarmManager;
 import com.larko.haygolem.Proxy.CommonProxy;
 import com.larko.haygolem.Util.Metadata;
 
@@ -8,6 +9,8 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import org.apache.logging.log4j.Logger;
 
@@ -34,5 +37,15 @@ public class Main
         // some example code
         //NetworkRegistry.INSTANCE.registerGuiHandler(Metadata.MODID, );
         logger.info("initialized");
+    }
+
+    @EventHandler
+    public void serverLoad(FMLServerStartingEvent event) {
+        FarmManager.deserialize();
+    }
+
+    @EventHandler
+    public void serverStop(FMLServerStoppingEvent event) {
+        FarmManager.serialize();
     }
 }

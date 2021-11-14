@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.entity.RenderEntity;
 import net.minecraft.client.renderer.entity.RenderIronGolem;
 import net.minecraft.entity.monster.EntityIronGolem;
+import net.minecraft.network.datasync.DataSerializer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.event.RegistryEvent;
@@ -18,6 +19,7 @@ import net.minecraftforge.fml.common.registry.EntityEntryBuilder;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.registries.DataSerializerEntry;
 
 @Mod.EventBusSubscriber
 public class RegistryHandler {

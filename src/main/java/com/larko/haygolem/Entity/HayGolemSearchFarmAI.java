@@ -15,7 +15,6 @@ public class HayGolemSearchFarmAI extends EntityAIBase
     protected int runDelay;
     private int timeoutCounter;
     private int maxStayTicks;
-    protected BlockPos destinationBlock = BlockPos.ORIGIN;
     private final int searchLength;
 
     public HayGolemSearchFarmAI(HayGolemEntity hayGolem, double speedIn, int length)
@@ -39,7 +38,12 @@ public class HayGolemSearchFarmAI extends EntityAIBase
 
     public void startExecuting()
     {
-        this.hayGolem.getNavigator().tryMoveToXYZ((double)((float)this.destinationBlock.getX()) + 0.5D, (double)(this.destinationBlock.getY() + 1), (double)((float)this.destinationBlock.getZ()) + 0.5D, this.movementSpeed);
+        BlockPos dest = this.hayGolem.farm.getCenter();
+        this.hayGolem.getNavigator().tryMoveToXYZ(
+                (double)((float)dest.getX()) + 0.5D,
+            (double)((float)dest.getY() + 1),
+            (double)((float)dest.getZ()) + 0.5D, this.movementSpeed);
+
         this.timeoutCounter = 0;
         this.maxStayTicks = this.hayGolem.getRNG().nextInt(this.hayGolem.getRNG().nextInt(1200) + 1200) + 1200;
     }
@@ -52,7 +56,8 @@ public class HayGolemSearchFarmAI extends EntityAIBase
 
             if (this.timeoutCounter % 40 == 0)
             {
-                this.hayGolem.getNavigator().tryMoveToXYZ((double)((float)this.destinationBlock.getX()) + 0.5D, (double)(this.destinationBlock.getY() + 1), (double)((float)this.destinationBlock.getZ()) + 0.5D, this.movementSpeed);
+                BlockPos dest = this.hayGolem.farm.getCenter();
+                this.hayGolem.getNavigator().tryMoveToXYZ((double)((float)dest.getX()) + 0.5D, (double)(dest.getY() + 1), (double)((float)dest.getZ()) + 0.5D, this.movementSpeed);
             }
         }
         else
@@ -70,7 +75,6 @@ public class HayGolemSearchFarmAI extends EntityAIBase
             if (this.hayGolem.getDistance(farm.getCenter().getX(), farm.getCenter().getY(), farm.getCenter().getZ()) < searchLength)
             {
                 this.hayGolem.farm = farm;
-                this.destinationBlock = farm.getCenter();
                 return true;
             }
         }

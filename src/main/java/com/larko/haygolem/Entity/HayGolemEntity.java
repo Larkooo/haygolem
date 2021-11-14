@@ -32,53 +32,9 @@ import net.minecraftforge.items.ItemStackHandler;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class HayGolemEntity extends EntityGolem implements net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound>/*implements net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound>*/ {
-
-//    static class AIMoveFarm extends EntityAIMoveToBlock
-//    {
-//        private final HayGolemEntity hayGolem;
-//
-//        public AIMoveFarm(HayGolemEntity hayGolem)
-//        {
-//            super(hayGolem, 0.699999988079071D, 50);
-//            this.hayGolem = hayGolem;
-//        }
-//
-//        public boolean shouldExecute()
-//        {
-//            if (this.runDelay <= 0)
-//            {
-//                if (hayGolem.farm == null)
-//                    return false;
-//            }
-//
-//            return super.shouldExecute();
-//        }
-//
-//        public boolean shouldContinueExecuting()
-//        {
-//            return super.shouldContinueExecuting();
-//        }
-//
-//        public void updateTask()
-//        {
-//            super.updateTask();
-//        }
-//
-//        protected boolean shouldMoveTo(World worldIn, BlockPos pos)
-//        {
-//            Block block = worldIn.getBlockState(pos).getBlock();
-//
-//            if (pos == hayGolem.farm.getCenter())
-//            {
-//                return true;
-//            }
-//
-//            return false;
-//        }
-//    }
-
     public enum Status
     {
         SEARCHING_FARM,
@@ -195,6 +151,16 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
             }
         }
 
+        // farm
+        try
+        {
+            this.farm = FarmManager.findByUuid(UUID.fromString(compound.getString("farm")));
+        }
+        catch (IllegalArgumentException e)
+        {
+            this.farm = null;
+        }
+
         this.setCanPickUpLoot(true);
     }
 
@@ -214,5 +180,8 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
         }
 
         compound.setTag("Inventory", nbttaglist);
+        // farm
+        if (this.farm != null)
+            compound.setString("farm", this.farm.getUuid().toString());
     }
 }

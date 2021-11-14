@@ -1,5 +1,6 @@
 package com.larko.haygolem.Managers;
 
+import com.larko.haygolem.Serializers.FarmSerializer;
 import com.larko.haygolem.World.Farm;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHay;
@@ -7,6 +8,7 @@ import net.minecraft.block.BlockTorch;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
@@ -16,8 +18,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Mod.EventBusSubscriber
 public class FarmManager {
@@ -36,6 +37,7 @@ public class FarmManager {
 
     private static Class<? extends Block> boundaryBlock = BlockTorch.class;
 
+    // create a farm
     @SubscribeEvent
     public static void onPlaceEvent(BlockEvent.EntityPlaceEvent event) {
         if (!(event.getEntity() instanceof EntityPlayerMP))
@@ -63,6 +65,64 @@ public class FarmManager {
             return;
 
         pointCounter = 0;
-        farms.add(new Farm(startingPoint, new Vec3i(sizeX, sizeY, sizeZ), event.getWorld()));
+        farms.add(new Farm(event.getEntity().getUniqueID(), startingPoint, new Vec3i(sizeX, sizeY, sizeZ), event.getBlockSnapshot().getDimId()));
+    }
+
+    // delete destroyed farm boundaries
+//    @SubscribeEvent
+//    public static void onBlockDestroy()
+
+    public static Farm findByUuid(UUID uuid)
+    {
+        for (Farm farm : farms)
+        {
+            if (farm.getUuid().equals(uuid))
+                return farm;
+        }
+
+        return null;
+    }
+
+    public static void serialize()
+    {
+        FarmSerializer store = FarmSerializer.get();
+
+        // remove all data
+        if(store != null && store.data != null && store.data.getSize() > 0) {
+            Set<String> toRemove = new HashSet<String>();
+            for(String key : store.data.getKeySet()) { // Remove all data
+                if(!key.equals("")) {
+                    toRemove.add(key);
+                }
+            }
+            for(String key : toRemove) {
+                store.data.removeTag(key);
+            }
+        }
+
+        // patch new data
+        for (Farm farm : farms)
+        {
+            NBTTagCompound data = farm.serialize();
+
+            store.data.setTag("FARM_" + farm.getUuid().toString(), data);
+            store.markDirty();
+        }
+    }
+
+    public static void deserialize()
+    {
+        farms.clear();
+
+        FarmSerializer store = FarmSerializer.get();
+        if (store.data != null)
+        {
+            for (String key : store.data.getKeySet())
+            {
+                Farm farm = Farm.deserialize(store.data.getCompoundTag(key));
+
+                farms.add(farm);
+            }
+        }
     }
 }
