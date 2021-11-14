@@ -20,19 +20,19 @@ public class Farm {
 
     public World getWorld()
     {
-        return world;
+        return this.world;
     }
 
     public boolean isWithinBounds(BlockPos pos)
     {
-        Vec3i endingPos = startingPos.add(size);
+        Vec3i endingPos = startingPos.add(this.size);
         return pos.getX() >= startingPos.getX() &&
                 pos.getX() <= endingPos.getX() &&
 
                 pos.getY() >= startingPos.getY() &&
                 pos.getY() <= endingPos.getY() &&
 
-                pos.getZ() >= startingPos.getX() &&
+                pos.getZ() >= startingPos.getZ() &&
                 pos.getZ() <= endingPos.getZ();
     }
 

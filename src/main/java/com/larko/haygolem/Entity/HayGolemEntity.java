@@ -120,14 +120,14 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
     protected void initEntityAI() {
         super.initEntityAI();
         //this.tasks.addTask(1, new HayGolemHarvestAI(this, 0.4f));
-        this.tasks.addTask(1, new HayGolemSearchFarmAI(this, 0.4f, 50));
+        this.tasks.addTask(0, new HayGolemSearchFarmAI(this, 0.4f, 200));
     }
-
 
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
-
+//        if (this.farm != null)
+//            System.out.println(this.farm.isWithinBounds(this.getPosition()));
         // search for a farm
 //        if (this.status == Status.SEARCHING_FARM)
 //        {
