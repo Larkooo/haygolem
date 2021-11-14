@@ -10,9 +10,14 @@ import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class HayGolemHarvestAI extends EntityAIMoveToBlock
 {
@@ -63,7 +68,11 @@ public class HayGolemHarvestAI extends EntityAIMoveToBlock
 
             if (this.currentTask == 0 && block instanceof BlockCrops && ((BlockCrops)block).isMaxAge(iblockstate))
             {
-                world.destroyBlock(blockpos, true);
+                List<ItemStack> drops = world.getBlockState(blockpos).getBlock().getDrops(world, blockpos, world.getBlockState(blockpos), 0);
+                for (ItemStack drop : drops)
+                    this.hayGolem.getInventory().addItem(drop);
+
+                world.destroyBlock(blockpos, false);
             }
             else if (this.currentTask == 1 && iblockstate.getMaterial() == Material.AIR)
             {
