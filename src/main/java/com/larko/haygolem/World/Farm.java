@@ -67,6 +67,11 @@ public class Farm {
         return this.uuid;
     }
 
+    public Vec3i getSize()
+    {
+        return this.size;
+    }
+
     public BlockPos getCenter()
     {
         Vec3i halfSize = new Vec3i(size.getX() / 2, size.getY() / 2, size.getZ() / 2);

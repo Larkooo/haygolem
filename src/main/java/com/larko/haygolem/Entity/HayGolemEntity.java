@@ -5,8 +5,13 @@ import com.larko.haygolem.Entity.AI.HayGolemSearchFarmAI;
 import com.larko.haygolem.Entity.AI.HayGolemWanderAI;
 import com.larko.haygolem.Managers.FarmManager;
 import com.larko.haygolem.World.Farm;
+import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWanderAvoidWater;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.monster.EntityGolem;
+import net.minecraft.entity.monster.EntityIronGolem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.*;
 import net.minecraft.item.Item;
@@ -65,7 +70,11 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
         //this.tasks.addTask(1, new HayGolemHarvestAI(this, 0.4f));
         this.tasks.addTask(0, new HayGolemSearchFarmAI(this, 0.4f, 200));
         this.tasks.addTask(1, new HayGolemHarvestAI(this,  0.4f));
-        //this.tasks.addTask(2, new HayGolemWanderAI(this, 0.4f));
+        // broken
+        // this.tasks.addTask(2, new HayGolemWanderAI(this, 0.4f));
+        this.tasks.addTask(2, new EntityAIWander(this, 0.4f));
+        this.tasks.addTask(3, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
+        this.tasks.addTask(4, new EntityAILookIdle(this));
     }
 
     @Override
