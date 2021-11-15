@@ -12,7 +12,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-@Mod.EventBusSubscriber(value=Side.CLIENT, modid= Metadata.MODID)
+@Mod.EventBusSubscriber(modid= Metadata.MODID)
 public class FarmEventListener {
 
     @SubscribeEvent
