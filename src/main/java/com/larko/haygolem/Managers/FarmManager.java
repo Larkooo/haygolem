@@ -1,6 +1,7 @@
 package com.larko.haygolem.Managers;
 
 import com.larko.haygolem.Serializers.FarmSerializer;
+import com.larko.haygolem.Util.Metadata;
 import com.larko.haygolem.World.Farm;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHay;
@@ -20,8 +21,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.*;
 
-@Mod.EventBusSubscriber
-public class FarmManager {
+@Mod.EventBusSubscriber(modid= Metadata.MODID)public class FarmManager {
     // A        B
     //
     // C        D

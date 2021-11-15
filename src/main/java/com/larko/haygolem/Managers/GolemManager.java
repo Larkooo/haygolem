@@ -1,6 +1,7 @@
 package com.larko.haygolem.Managers;
 
 import com.larko.haygolem.Entity.HayGolemEntity;
+import com.larko.haygolem.Util.Metadata;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHay;
@@ -33,7 +34,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mod.EventBusSubscriber
+@Mod.EventBusSubscriber(modid=Metadata.MODID)
 public class GolemManager {
 
     public static BlockPattern pattern = FactoryBlockPattern

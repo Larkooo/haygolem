@@ -1,6 +1,7 @@
 package com.larko.haygolem.Events;
 
 import com.larko.haygolem.Entity.HayGolemEntity;
+import com.larko.haygolem.Util.Metadata;
 import jdk.nashorn.internal.ir.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntitySign;
@@ -12,7 +13,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-@Mod.EventBusSubscriber(value=Side.CLIENT)
+@Mod.EventBusSubscriber(value=Side.CLIENT, modid= Metadata.MODID)
 public class FarmEventListener {
 
     @SubscribeEvent

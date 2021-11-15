@@ -14,7 +14,8 @@ import net.minecraftforge.fml.common.registry.EntityEntryBuilder;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-@Mod.EventBusSubscriber
+
+@Mod.EventBusSubscriber(modid=Metadata.MODID)
 public class RegistryHandler {
 
     // gets incremented every time an entity is registered

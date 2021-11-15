@@ -19,7 +19,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-@Mod.EventBusSubscriber(value=Side.CLIENT)
+@Mod.EventBusSubscriber(value=Side.CLIENT, modid=Metadata.MODID)
 public class HayGolemEventListener {
 
     @SubscribeEvent
