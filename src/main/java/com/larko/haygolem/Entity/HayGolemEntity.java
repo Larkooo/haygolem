@@ -60,7 +60,7 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
         this.tasks.addTask(0, new EntityAISwimming(this));
         this.tasks.addTask(1, new HayGolemSearchFarmAI(this, 0.4f, 200));
         this.tasks.addTask(2, new HayGolemHarvestAI(this,  0.4f));
-        this.tasks.addTask(3, new EntityAITempt(this, 1.25D, Item.getItemFromBlock(Blocks.HAY_BLOCK), false));
+        this.tasks.addTask(3, new EntityAITempt(this, 0.4f, Item.getItemFromBlock(Blocks.HAY_BLOCK), false));
         // broken
         // this.tasks.addTask(2, new HayGolemWanderAI(this, 0.4f));
         //this.tasks.addTask(2, new EntityAIWander(this, 0.4f));
