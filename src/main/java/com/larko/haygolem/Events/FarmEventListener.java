@@ -18,9 +18,6 @@ public class FarmEventListener {
     @SubscribeEvent
     public static void onPlayerInteract(PlayerInteractEvent.RightClickBlock event)
     {
-        if (event.getWorld().isRemote)
-            return;
-
         if (!(event.getWorld().getTileEntity(event.getPos()) instanceof TileEntitySign))
             return;
 

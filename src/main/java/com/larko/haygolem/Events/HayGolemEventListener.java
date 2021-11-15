@@ -25,9 +25,6 @@ public class HayGolemEventListener {
     @SubscribeEvent
     public static void onPlayerInteract(PlayerInteractEvent.EntityInteract event)
     {
-        if (event.getWorld().isRemote)
-            return;
-
         if (!(event.getTarget() instanceof HayGolemEntity))
             return;
 
