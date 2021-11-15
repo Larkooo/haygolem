@@ -2,7 +2,6 @@ package com.larko.haygolem.Events;
 
 import com.larko.haygolem.Entity.HayGolemEntity;
 import com.larko.haygolem.Util.Metadata;
-import jdk.nashorn.internal.ir.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.math.BlockPos;
