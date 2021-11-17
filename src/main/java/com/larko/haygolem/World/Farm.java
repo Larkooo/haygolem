@@ -51,8 +51,8 @@ public class Farm {
 
                 (size.getY() < 0 ?
                 pos.getY() <= startingPos.getY() &&
-                        pos.getY() >= endingPos.getY()
-                : pos.getY() >= startingPos.getY() &&
+                        pos.getY() >= endingPos.getY() - 1
+                : pos.getY() >= startingPos.getY() - 1 &&
                     pos.getY() <= endingPos.getY()) &&
 
                 (size.getZ() < 0 ?
@@ -65,6 +65,11 @@ public class Farm {
     public UUID getUuid()
     {
         return this.uuid;
+    }
+
+    public BlockPos getStartingPos()
+    {
+        return this.startingPos;
     }
 
     public Vec3i getSize()

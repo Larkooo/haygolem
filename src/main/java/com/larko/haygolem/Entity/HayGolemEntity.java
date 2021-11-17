@@ -2,12 +2,10 @@ package com.larko.haygolem.Entity;
 
 import com.larko.haygolem.Entity.AI.HayGolemHarvestAI;
 import com.larko.haygolem.Entity.AI.HayGolemSearchFarmAI;
-import com.larko.haygolem.Entity.AI.HayGolemWanderAI;
 import com.larko.haygolem.Managers.FarmManager;
 import com.larko.haygolem.World.Farm;
 import net.minecraft.entity.ai.*;
 import net.minecraft.entity.monster.EntityGolem;
-import net.minecraft.entity.monster.EntityIronGolem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -95,6 +93,16 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
         return this.inventory;
     }
 
+    public boolean isInventoryFull()
+    {
+        for (int i = 0; i < this.inventory.getSizeInventory(); i++)
+        {
+            if (this.inventory.getStackInSlot(i).isEmpty())
+                return false;
+        }
+        return true;
+    }
+
     public ItemStack hasToolInInventory()
     {
         ItemStack bestTool = null;
@@ -119,13 +127,34 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
         return bestTool;
     }
 
-    public boolean isFarmItemInInventory()
+    public boolean hasItem(Item item)
     {
         for (int i = 0; i < this.inventory.getSizeInventory(); ++i)
         {
             ItemStack itemstack = this.inventory.getStackInSlot(i);
 
-            if (!itemstack.isEmpty() && (itemstack.getItem() == Items.WHEAT_SEEDS || itemstack.getItem() == Items.POTATO || itemstack.getItem() == Items.CARROT || itemstack.getItem() == Items.BEETROOT_SEEDS))
+            if (!itemstack.isEmpty() && itemstack.getItem() == item)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean hasPlantableItem()
+    {
+        for (int i = 0; i < this.inventory.getSizeInventory(); ++i)
+        {
+            ItemStack itemstack = this.inventory.getStackInSlot(i);
+
+            if (!itemstack.isEmpty() &&
+                    (itemstack.getItem() == Items.WHEAT_SEEDS
+                            || itemstack.getItem() == Items.POTATO
+                            || itemstack.getItem() == Items.CARROT
+                            || itemstack.getItem() == Items.BEETROOT_SEEDS
+                    )
+            )
             {
                 return true;
             }
