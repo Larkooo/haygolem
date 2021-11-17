@@ -43,7 +43,7 @@ public class HayGolemHarvestAI extends EntityAIBase
         HARVEST_REEDS,
         PLANT_CACTUS,
         HARVEST_CACTUS,
-
+        USE_BONEMEAL,
         DEPOSIT_CHEST
     }
 
@@ -109,7 +109,26 @@ public class HayGolemHarvestAI extends EntityAIBase
             IBlockState iblockstate = world.getBlockState(blockpos);
             Block block = iblockstate.getBlock();
 
-            if (this.currentTask == Task.HARVEST_CROPS && block instanceof BlockCrops && ((BlockCrops)block).isMaxAge(iblockstate))
+            if (this.currentTask == Task.USE_BONEMEAL && block instanceof BlockCrops)
+            {
+                for (int i = 0; i < this.hayGolem.getInventory().getSizeInventory(); i++)
+                {
+                    ItemStack itemStack = this.hayGolem.getInventory().getStackInSlot(i);
+
+                    if (!itemStack.isEmpty() && itemStack.getItem() == Items.DYE && itemStack.getMetadata() == 15)
+                    {
+                        ((BlockCrops) block).grow(world, blockpos, iblockstate);
+
+                        itemStack.shrink(1);
+                        if (itemStack.isEmpty())
+                        {
+                            this.hayGolem.getInventory().setInventorySlotContents(i, ItemStack.EMPTY);
+                        }
+                        break;
+                    }
+                }
+            }
+            else if (this.currentTask == Task.HARVEST_CROPS && block instanceof BlockCrops && ((BlockCrops)block).isMaxAge(iblockstate))
             {
                 List<ItemStack> drops = world.getBlockState(blockpos).getBlock().getDrops(world, blockpos, world.getBlockState(blockpos), 0);
                 for (ItemStack drop : drops)
@@ -327,6 +346,11 @@ public class HayGolemHarvestAI extends EntityAIBase
             if (topBlock instanceof BlockCrops && ((BlockCrops)topBlock).isMaxAge(topBlockState) && (this.currentTask == Task.IDLING || this.currentTask == Task.HARVEST_CROPS))
             {
                 this.currentTask = Task.HARVEST_CROPS;
+                return true;
+            }
+            else if (topBlock instanceof BlockCrops && this.hayGolem.hasItem(Items.DYE)  && this.hayGolem.getItem(Items.DYE).getMetadata() == 15 && (this.currentTask == Task.IDLING || this.currentTask == Task.USE_BONEMEAL))
+            {
+                this.currentTask = Task.USE_BONEMEAL;
                 return true;
             }
             if (topBlockState.getMaterial() == Material.AIR && this.hayGolem.hasPlantableItem() && (this.currentTask == Task.IDLING || this.currentTask == Task.PLANT_CROPS))

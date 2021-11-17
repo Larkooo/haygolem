@@ -4,6 +4,7 @@ import com.larko.haygolem.Entity.AI.HayGolemHarvestAI;
 import com.larko.haygolem.Entity.AI.HayGolemSearchFarmAI;
 import com.larko.haygolem.Managers.FarmManager;
 import com.larko.haygolem.World.Farm;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.*;
 import net.minecraft.entity.monster.EntityGolem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -45,7 +46,6 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
         this.inventory.addInventoryChangeListener(invBasic -> onInventoryChange());
     }
 
-
     @Override
     protected void entityInit() {
         super.entityInit();
@@ -56,9 +56,9 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
         super.initEntityAI();
         //this.tasks.addTask(1, new HayGolemHarvestAI(this, 0.4f));
         this.tasks.addTask(0, new EntityAISwimming(this));
-        this.tasks.addTask(1, new HayGolemSearchFarmAI(this, 0.4f, 200));
-        this.tasks.addTask(2, new HayGolemHarvestAI(this,  0.4f));
-        this.tasks.addTask(3, new EntityAITempt(this, 0.4f, Item.getItemFromBlock(Blocks.HAY_BLOCK), false));
+        this.tasks.addTask(1, new HayGolemSearchFarmAI(this, 1.0f, 100));
+        this.tasks.addTask(2, new HayGolemHarvestAI(this,  1.0f));
+        this.tasks.addTask(3, new EntityAITempt(this, 1.0f, Item.getItemFromBlock(Blocks.HAY_BLOCK), false));
         // broken
         // this.tasks.addTask(2, new HayGolemWanderAI(this, 0.4f));
         //this.tasks.addTask(2, new EntityAIWander(this, 0.4f));
@@ -66,7 +66,15 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
         this.tasks.addTask(5, new EntityAILookIdle(this));
     }
 
-
+    @Override
+    public void applyEntityAttributes()
+    {
+        super.applyEntityAttributes();
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(100.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25D);
+        this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(100.0D);
+    }
 
     @Override
     public void onLivingUpdate() {
@@ -129,9 +137,25 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
         return bestTool;
     }
 
+    @Nullable
+    public ItemStack getItem(Item item)
+    {
+        for (int i = 0; i < this.inventory.getSizeInventory(); i++)
+        {
+            ItemStack itemStack = this.inventory.getStackInSlot(i);
+
+            if (!itemStack.isEmpty() && itemStack.getItem() == item)
+            {
+                return itemStack;
+            }
+        }
+
+        return null;
+    }
+
     public boolean hasItem(Item item)
     {
-        for (int i = 0; i < this.inventory.getSizeInventory(); ++i)
+        for (int i = 0; i < this.inventory.getSizeInventory(); i++)
         {
             ItemStack itemstack = this.inventory.getStackInSlot(i);
 
