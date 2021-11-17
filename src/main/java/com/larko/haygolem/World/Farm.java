@@ -14,6 +14,7 @@ public class Farm {
 
     private BlockPos startingPos;
     private Vec3i size;
+    public int workersCount = 0;
 
     private int dimensionId;
 
@@ -65,6 +66,11 @@ public class Farm {
     public UUID getUuid()
     {
         return this.uuid;
+    }
+
+    public EntityPlayer getPlayer()
+    {
+        return Minecraft.getMinecraft().world.getPlayerEntityByUUID(ownerUuid);
     }
 
     public BlockPos getStartingPos()

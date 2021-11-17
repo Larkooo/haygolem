@@ -66,6 +66,8 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
         this.tasks.addTask(5, new EntityAILookIdle(this));
     }
 
+
+
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
@@ -191,6 +193,8 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
         try
         {
             this.farm = FarmManager.findByUuid(UUID.fromString(compound.getString("farm")));
+            if (this.farm != null)
+                this.farm.workersCount++;
         }
         catch (IllegalArgumentException e)
         {

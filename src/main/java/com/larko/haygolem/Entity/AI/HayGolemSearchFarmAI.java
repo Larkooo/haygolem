@@ -107,6 +107,7 @@ public class HayGolemSearchFarmAI extends EntityAIBase
                 closest.getCenter().getZ()) < this.searchLength)
         {
             this.hayGolem.farm = closest;
+            this.hayGolem.farm.workersCount++;
             return true;
         }
 
