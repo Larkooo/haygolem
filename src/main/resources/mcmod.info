@@ -2,13 +2,13 @@
 {
   "modid": "haygolem",
   "name": "Hay Golem",
-  "description": "Example placeholder mod.",
+  "description": "A Simple Golem that Harvests your farms!",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["Larko"],
-  "credits": "Larko",
+  "authorList": ["Larko", "Eragonn1490"],
+  "credits": "Larko", "Eragonn1490,
   "logoFile": "",
   "screenshots": [],
   "dependencies": []
