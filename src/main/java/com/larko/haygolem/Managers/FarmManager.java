@@ -21,7 +21,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.*;
 
-@Mod.EventBusSubscriber(modid= Metadata.MODID)public class FarmManager {
+@Mod.EventBusSubscriber(modid= Metadata.MODID)
+public class FarmManager {
     // A        B
     //
     // C        D

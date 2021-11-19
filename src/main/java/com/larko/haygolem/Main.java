@@ -1,5 +1,8 @@
 package com.larko.haygolem;
 
+import org.apache.logging.log4j.Logger;
+
+import com.larko.haygolem.Handlers.PacketHandler;
 import com.larko.haygolem.Managers.FarmManager;
 import com.larko.haygolem.Proxy.CommonProxy;
 import com.larko.haygolem.Util.Metadata;
@@ -11,8 +14,6 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import org.apache.logging.log4j.Logger;
 
 @Mod(modid = Metadata.MODID, name = Metadata.NAME, version = Metadata.VERSION)
 public class Main
@@ -28,6 +29,7 @@ public class Main
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
+    	PacketHandler.registerMessages("farmgui");
         logger = event.getModLog();
     }
 
