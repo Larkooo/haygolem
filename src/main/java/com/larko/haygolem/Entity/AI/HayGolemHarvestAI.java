@@ -84,7 +84,7 @@ public class HayGolemHarvestAI extends EntityAIBase
 
     public void updateTask()
     {
-        if (Math.sqrt(this.hayGolem.getDistanceSq(this.destinationBlock.up())) > 3.0)
+        if (Math.sqrt(this.hayGolem.getDistanceSq(this.destinationBlock.up())) > 3.0 || (this.currentTask == Task.HARVEST_CACTUS && Math.sqrt(this.hayGolem.getDistanceSq(this.destinationBlock.up())) > 6.0))
         {
             this.closeToDestination = false;
             ++this.timeoutCounter;
