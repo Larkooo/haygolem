@@ -15,6 +15,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 
@@ -196,6 +197,13 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
             return;
 
         this.setHeldItem(EnumHand.MAIN_HAND, tool);
+    }
+
+    @Override
+    public void onDeath(DamageSource cause) {
+        super.onDeath(cause);
+        if (this.farm != null)
+            this.farm.workersCount--;
     }
 
     @Override
