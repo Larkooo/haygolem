@@ -29,7 +29,7 @@ public class FarmEventListener {
         boolean trigger = false;
         for (ITextComponent text : sign.signText)
         {
-            if (text.getUnformattedText().contains("farm"))
+            if (text.getUnformattedText().contains("farm") || text.getUnformattedText().contains("Farm"))
             {
                 trigger = true;
                 break;
