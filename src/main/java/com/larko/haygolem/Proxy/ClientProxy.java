@@ -6,6 +6,7 @@ import com.larko.haygolem.World.Farm;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
+import org.lwjgl.input.Mouse;
 
 public class ClientProxy extends CommonProxy {
 	@Override
@@ -18,6 +19,7 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void displayFarmGui(Farm farm)
 	{
+		Minecraft.getMinecraft().setIngameNotInFocus();
 		Minecraft.getMinecraft().displayGuiScreen(new FarmGui(farm));
 	}
 }
