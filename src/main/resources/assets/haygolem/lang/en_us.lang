@@ -1,0 +1,5 @@
+#Entities
+entity.hay_golem.name=Hay Golem
+
+#Blocks
+tile.FarmMarker.name=Farm Marker
