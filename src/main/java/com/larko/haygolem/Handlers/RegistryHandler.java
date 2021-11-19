@@ -7,6 +7,7 @@ import com.larko.haygolem.Util.Metadata;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockTorch;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.init.Blocks;
@@ -42,6 +43,8 @@ public class RegistryHandler {
     // gets incremented every time an entity is registered
     public static int entityId = 0;
 
+    public static FarmMarkerBlock farmMarkerBlock = new FarmMarkerBlock();
+
     @SubscribeEvent
     public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
         EntityEntry hayGolem = EntityEntryBuilder.create()
@@ -57,12 +60,12 @@ public class RegistryHandler {
 
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) {
-        event.getRegistry().register(new FarmMarkerBlock());
+        event.getRegistry().register(farmMarkerBlock);
     }
 
     @SubscribeEvent
     public static void registerItemBlocks(RegistryEvent.Register<Item> event) {
-        event.getRegistry().registerAll(new ItemBlock(new FarmMarkerBlock()).setRegistryName(new FarmMarkerBlock().getRegistryName()));
+        event.getRegistry().register(new ItemBlock(farmMarkerBlock).setRegistryName(farmMarkerBlock.getRegistryName()));
     }
 
     @SubscribeEvent
@@ -70,7 +73,7 @@ public class RegistryHandler {
         NonNullList<Ingredient> lst = NonNullList.create();
         lst.add(Ingredient.fromItem(Item.getItemFromBlock(Blocks.TORCH)));
         lst.add(Ingredient.fromItem(Item.getItemFromBlock(Blocks.TORCH)));
-        event.getRegistry().register(new ShapelessRecipes("farm_marker", new ItemStack(Item.getItemFromBlock(new FarmMarkerBlock())), lst).setRegistryName(Metadata.MODID, "farm_marker_recipe"));
+        event.getRegistry().register(new ShapelessRecipes("farm_marker", new ItemStack(Item.getItemFromBlock(farmMarkerBlock)), lst).setRegistryName(Metadata.MODID, "farm_marker_recipe"));
     }
 
     //subscribes to the register event for entities
@@ -79,7 +82,8 @@ public class RegistryHandler {
     public static void registerModels(ModelRegistryEvent event) {
         // register haygolem renderer
         RenderingRegistry.registerEntityRenderingHandler(HayGolemEntity.class, HayGolemRenderer::new);
-        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(new FarmMarkerBlock()), 0, new ModelResourceLocation(Item.getItemFromBlock(Blocks.TORCH).getRegistryName(), "inventory"));
+        System.out.println(new ModelResourceLocation(Item.getItemFromBlock(farmMarkerBlock).getRegistryName(), "inventory"));
+        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(farmMarkerBlock), 0, new ModelResourceLocation(Item.getItemFromBlock(farmMarkerBlock).getRegistryName(), "inventory"));
     }
 
 

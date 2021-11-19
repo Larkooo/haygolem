@@ -1,5 +1,6 @@
 package com.larko.haygolem.Managers;
 
+import com.larko.haygolem.Block.FarmMarkerBlock;
 import com.larko.haygolem.Serializers.FarmSerializer;
 import com.larko.haygolem.Util.Metadata;
 import com.larko.haygolem.World.Farm;
@@ -36,7 +37,7 @@ public class FarmManager {
 
     public static ArrayList<Farm> farms = new ArrayList<>();
 
-    private static Class<? extends Block> boundaryBlock = BlockTorch.class;
+    public static final Class<? extends Block> boundaryBlock = FarmMarkerBlock.class;
 
     // create a farm
     @SubscribeEvent

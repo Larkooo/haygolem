@@ -10,8 +10,10 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 @Mod.EventBusSubscriber(modid=Metadata.MODID)
 public class FarmEventListener {
@@ -42,6 +44,25 @@ public class FarmEventListener {
             if (farm.isWithinBounds(event.getPos()))
             {
                 Main.commonProxy.showFarmGui(farm, event.getWorld(), event.getEntityPlayer());
+                return;
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onBlockDestroy(BlockEvent.BreakEvent event)
+    {
+        // check if broke block is boundary block
+        if (!(event.getWorld().getBlockState(event.getPos()).getBlock().getClass() == FarmManager.boundaryBlock))
+            return;
+
+        // check if is within a farm
+        for (int i = 0; i < FarmManager.farms.size(); i++)
+        {
+            if (FarmManager.farms.get(i).isWithinBounds(event.getPos()))
+            {
+                // remove the farm
+                FarmManager.farms.remove(i);
                 return;
             }
         }
