@@ -84,6 +84,8 @@ public class HayGolemHarvestAI extends EntityAIBase
 
     public void updateTask()
     {
+        this.hayGolem.farm.focusedBlocks.remove(this.destinationBlock);
+
         if (Math.sqrt(this.hayGolem.getDistanceSq(this.destinationBlock.up())) > 3.0 || (this.currentTask == Task.HARVEST_CACTUS && Math.sqrt(this.hayGolem.getDistanceSq(this.destinationBlock.up())) > 6.0))
         {
             this.closeToDestination = false;
@@ -97,6 +99,7 @@ public class HayGolemHarvestAI extends EntityAIBase
         else
         {
             this.closeToDestination = true;
+            //this.hayGolem.farm.focusedBlocks.remove(this.destinationBlock);
             --this.timeoutCounter;
         }
 
@@ -323,7 +326,8 @@ public class HayGolemHarvestAI extends EntityAIBase
 
                     if (this.shouldMoveTo(this.hayGolem.world, pos))
                     {
-                        destinationBlock = pos;
+                        this.destinationBlock = pos;
+                        this.hayGolem.farm.focusedBlocks.add(this.destinationBlock);
                         return true;
                     }
                 }
@@ -335,39 +339,44 @@ public class HayGolemHarvestAI extends EntityAIBase
 
     private boolean shouldMoveTo(World worldIn, BlockPos pos)
     {
+        if (this.hayGolem.farm.focusedBlocks.contains(pos))
+            return false;
+
         IBlockState blockState = worldIn.getBlockState(pos);
         Block block = blockState.getBlock();
 
         IBlockState topBlockState = worldIn.getBlockState(pos.up());
         Block topBlock = topBlockState.getBlock();
 
+
+        boolean moveToFlag = false;
         if (block instanceof BlockFarmland)
         {
             if (topBlock instanceof BlockCrops && ((BlockCrops)topBlock).isMaxAge(topBlockState) && (this.currentTask == Task.IDLING || this.currentTask == Task.HARVEST_CROPS))
             {
                 this.currentTask = Task.HARVEST_CROPS;
-                return true;
+                moveToFlag = true;
             }
             else if (topBlock instanceof BlockCrops && this.hayGolem.hasItem(Items.DYE)  && this.hayGolem.getItem(Items.DYE).getMetadata() == 15 && (this.currentTask == Task.IDLING || this.currentTask == Task.USE_BONEMEAL))
             {
                 this.currentTask = Task.USE_BONEMEAL;
-                return true;
+                moveToFlag = true;
             }
             if (topBlockState.getMaterial() == Material.AIR && this.hayGolem.hasPlantableItem() && (this.currentTask == Task.IDLING || this.currentTask == Task.PLANT_CROPS))
             {
                 this.currentTask = Task.PLANT_CROPS;
-                return true;
+                moveToFlag = true;
             }
         }
         else if ((topBlock instanceof BlockMelon || topBlock instanceof BlockPumpkin) && (this.currentTask == Task.IDLING || this.currentTask == Task.HARVEST_SPECIFIC_BLOCKS))
         {
             this.currentTask = Task.HARVEST_SPECIFIC_BLOCKS;
-            return true;
+            moveToFlag = true;
         }
         else if (topBlock instanceof BlockChest && this.hayGolem.isInventoryFull() && (this.currentTask == Task.IDLING || this.currentTask == Task.DEPOSIT_CHEST))
         {
             this.currentTask = Task.DEPOSIT_CHEST;
-            return true;
+            moveToFlag = true;
         }
         else if (block instanceof BlockGrass &&
                 (worldIn.getBlockState(pos.north()).getMaterial() == Material.WATER ||
@@ -378,12 +387,12 @@ public class HayGolemHarvestAI extends EntityAIBase
             if (topBlock instanceof BlockReed && worldIn.getBlockState(pos.up().up()).getBlock() instanceof BlockReed && (this.currentTask == Task.IDLING || this.currentTask == Task.HARVEST_REEDS))
             {
                 this.currentTask = Task.HARVEST_REEDS;
-                return true;
+                moveToFlag = true;
             }
             if (topBlockState.getMaterial() == Material.AIR && this.hayGolem.hasItem(Items.REEDS) && (this.currentTask == Task.IDLING || this.currentTask == Task.PLANT_REEDS))
             {
                 this.currentTask = Task.PLANT_REEDS;
-                return true;
+                moveToFlag = true;
             }
         }
         else if (block instanceof BlockSand &&
@@ -395,15 +404,18 @@ public class HayGolemHarvestAI extends EntityAIBase
             if (topBlock instanceof BlockCactus && worldIn.getBlockState(pos.up().up()).getBlock() instanceof BlockCactus && (this.currentTask == Task.IDLING || this.currentTask == Task.HARVEST_CACTUS))
             {
                 this.currentTask = Task.HARVEST_CACTUS;
-                return true;
+                moveToFlag = true;
             }
             if (topBlockState.getMaterial() == Material.AIR && this.hayGolem.hasItem(Item.getItemFromBlock(Blocks.CACTUS)) && (this.currentTask == Task.IDLING || this.currentTask == Task.PLANT_CACTUS))
             {
                 this.currentTask = Task.PLANT_CACTUS;
-                return true;
+                moveToFlag = true;
             }
         }
 
-        return false;
+        //if (moveToFlag)
+        //    this.hayGolem.farm.focusedBlocks.add(pos);
+
+        return moveToFlag;
     }
 }

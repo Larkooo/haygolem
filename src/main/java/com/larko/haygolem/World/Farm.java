@@ -7,6 +7,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class Farm {
@@ -19,6 +21,8 @@ public class Farm {
     private int dimensionId;
 
     UUID ownerUuid;
+
+    public List<BlockPos> focusedBlocks = new ArrayList<>();
 
     public Farm(UUID ownerUuid, BlockPos startingPos, Vec3i size, int dimension)
     {

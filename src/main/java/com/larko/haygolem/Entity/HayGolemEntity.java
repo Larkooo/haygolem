@@ -202,6 +202,16 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
     @Override
     public void onDeath(DamageSource cause) {
         super.onDeath(cause);
+
+        for (int i = 0; i < this.inventory.getSizeInventory(); i++)
+        {
+            ItemStack itemStack = this.inventory.getStackInSlot(i);
+            if (itemStack.isEmpty())
+                continue;
+
+            this.dropItem(itemStack.getItem(), itemStack.getCount());
+        }
+
         if (this.farm != null)
             this.farm.workersCount--;
     }

@@ -38,13 +38,18 @@ public class HayGolemSearchFarmAI extends EntityAIBase
         else
         {
             this.runDelay = 200 + this.hayGolem.getRNG().nextInt(200);
-            return (this.hayGolem.farm != null && FarmManager.farms.contains(this.hayGolem.farm) && !this.hayGolem.farm.isWithinBounds(this.hayGolem.getPosition())) || this.searchForDestination();
+            if (this.hayGolem.farm != null && !this.hayGolem.farm.isWithinBounds(this.hayGolem.getPosition()))
+                return true;
+            else if (this.hayGolem.farm == null && this.searchForDestination())
+                return true;
+            else
+                return false;
         }
     }
 
     public boolean shouldContinueExecuting()
     {
-        return this.timeoutCounter >= -this.maxStayTicks && this.timeoutCounter <= 1200 && this.hayGolem.farm != null && FarmManager.farms.contains(this.hayGolem.farm) && !this.hayGolem.farm.isWithinBounds(this.hayGolem.getPosition());
+        return this.timeoutCounter >= -this.maxStayTicks && this.timeoutCounter <= 1200 && this.hayGolem.farm != null && !this.hayGolem.farm.isWithinBounds(this.hayGolem.getPosition());
     }
 
     public void startExecuting()
