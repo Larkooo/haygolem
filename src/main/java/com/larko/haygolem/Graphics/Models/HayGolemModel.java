@@ -1,125 +1,79 @@
 package com.larko.haygolem.Graphics.Models;
 
-import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.model.ModelBiped;
-import net.minecraft.client.model.ModelRenderer;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.EnumHandSide;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import com.larko.haygolem.Entity.HayGolemEntity;
+import net.minecraft.client.model.HierarchicalModel;
 
-@SideOnly(Side.CLIENT)
-public class HayGolemModel extends ModelBase
-{
-    public ModelRenderer hayGolemHead;
-    public ModelRenderer hayGolemBody;
-    public ModelRenderer hayGolemRightArm;
-    public ModelRenderer hayGolemLeftArm;
-    public ModelRenderer hayGolemLeftLeg;
-    public ModelRenderer hayGolemRightLeg;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.*;
 
-    public HayGolemModel()
-    {
-        this(0.0F);
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
+@OnlyIn(Dist.CLIENT)
+public class HayGolemModel<T extends HayGolemEntity> extends HierarchicalModel<T> {
+    private final ModelPart root;
+    private final ModelPart head;
+    private final ModelPart rightArm;
+    private final ModelPart leftArm;
+    private final ModelPart rightLeg;
+    private final ModelPart leftLeg;
+
+    public HayGolemModel(ModelPart p_170697_) {
+        this.root = p_170697_;
+        this.head = p_170697_.getChild("head");
+        this.rightArm = p_170697_.getChild("right_arm");
+        this.leftArm = p_170697_.getChild("left_arm");
+        this.rightLeg = p_170697_.getChild("right_leg");
+        this.leftLeg = p_170697_.getChild("left_leg");
     }
 
-    public HayGolemModel(float p_i1161_1_)
-    {
-        this(p_i1161_1_, -7.0F);
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshdefinition = new MeshDefinition();
+        PartDefinition partdefinition = meshdefinition.getRoot();
+        partdefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -12.0F, -5.5F, 8.0F, 10.0F, 8.0F).texOffs(24, 0).addBox(-1.0F, -5.0F, -7.5F, 2.0F, 4.0F, 2.0F), PartPose.offset(0.0F, -7.0F, -2.0F));
+        partdefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 40).addBox(-9.0F, -2.0F, -6.0F, 18.0F, 12.0F, 11.0F).texOffs(0, 70).addBox(-4.5F, 10.0F, -3.0F, 9.0F, 5.0F, 6.0F, new CubeDeformation(0.5F)), PartPose.offset(0.0F, -7.0F, 0.0F));
+        partdefinition.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(60, 21).addBox(-13.0F, -2.5F, -3.0F, 4.0F, 30.0F, 6.0F), PartPose.offset(0.0F, -7.0F, 0.0F));
+        partdefinition.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(60, 58).addBox(9.0F, -2.5F, -3.0F, 4.0F, 30.0F, 6.0F), PartPose.offset(0.0F, -7.0F, 0.0F));
+        partdefinition.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(37, 0).addBox(-3.5F, -3.0F, -3.0F, 6.0F, 16.0F, 5.0F), PartPose.offset(-4.0F, 11.0F, 0.0F));
+        partdefinition.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(60, 0).mirror().addBox(-3.5F, -3.0F, -3.0F, 6.0F, 16.0F, 5.0F), PartPose.offset(5.0F, 11.0F, 0.0F));
+        return LayerDefinition.create(meshdefinition, 128, 128);
     }
 
-    public HayGolemModel(float p_i46362_1_, float p_i46362_2_)
-    {
-        int i = 128;
-        int j = 128;
-        this.hayGolemHead = (new ModelRenderer(this)).setTextureSize(128, 128);
-        this.hayGolemHead.setRotationPoint(0.0F, 0.0F + p_i46362_2_, -2.0F);
-        this.hayGolemHead.setTextureOffset(0, 0).addBox(-4.0F, -12.0F, -5.5F, 8, 10, 8, p_i46362_1_);
-        this.hayGolemHead.setTextureOffset(24, 0).addBox(-1.0F, -5.0F, -7.5F, 2, 4, 2, p_i46362_1_);
-        this.hayGolemBody = (new ModelRenderer(this)).setTextureSize(128, 128);
-        this.hayGolemBody.setRotationPoint(0.0F, 0.0F + p_i46362_2_, 0.0F);
-        this.hayGolemBody.setTextureOffset(0, 40).addBox(-9.0F, -2.0F, -6.0F, 18, 12, 11, p_i46362_1_);
-        this.hayGolemBody.setTextureOffset(0, 70).addBox(-4.5F, 10.0F, -3.0F, 9, 5, 6, p_i46362_1_ + 0.5F);
-        this.hayGolemRightArm = (new ModelRenderer(this)).setTextureSize(128, 128);
-        this.hayGolemRightArm.setRotationPoint(0.0F, -7.0F, 0.0F);
-        this.hayGolemRightArm.setTextureOffset(60, 21).addBox(-13.0F, -2.5F, -3.0F, 4, 30, 6, p_i46362_1_);
-        this.hayGolemLeftArm = (new ModelRenderer(this)).setTextureSize(128, 128);
-        this.hayGolemLeftArm.setRotationPoint(0.0F, -7.0F, 0.0F);
-        this.hayGolemLeftArm.setTextureOffset(60, 58).addBox(9.0F, -2.5F, -3.0F, 4, 30, 6, p_i46362_1_);
-        this.hayGolemLeftLeg = (new ModelRenderer(this, 0, 22)).setTextureSize(128, 128);
-        this.hayGolemLeftLeg.setRotationPoint(-4.0F, 18.0F + p_i46362_2_, 0.0F);
-        this.hayGolemLeftLeg.setTextureOffset(37, 0).addBox(-3.5F, -3.0F, -3.0F, 6, 16, 5, p_i46362_1_);
-        this.hayGolemRightLeg = (new ModelRenderer(this, 0, 22)).setTextureSize(128, 128);
-        this.hayGolemRightLeg.mirror = true;
-        this.hayGolemRightLeg.setTextureOffset(60, 0).setRotationPoint(5.0F, 18.0F + p_i46362_2_, 0.0F);
-        this.hayGolemRightLeg.addBox(-3.5F, -3.0F, -3.0F, 6, 16, 5, p_i46362_1_);
+    public ModelPart root() {
+        return this.root;
     }
 
-    public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale)
-    {
-        //super.render(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
-        this.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, entityIn);
-        this.hayGolemHead.render(scale);
-        this.hayGolemBody.render(scale);
-        this.hayGolemLeftLeg.render(scale);
-        this.hayGolemRightLeg.render(scale);
-        this.hayGolemRightArm.render(scale);
-        this.hayGolemLeftArm.render(scale);
+    public void setupAnim(T p_102962_, float p_102963_, float p_102964_, float p_102965_, float p_102966_, float p_102967_) {
+        this.head.yRot = p_102966_ * ((float)Math.PI / 180F);
+        this.head.xRot = p_102967_ * ((float)Math.PI / 180F);
+        this.rightLeg.xRot = -1.5F * Mth.triangleWave(p_102963_, 13.0F) * p_102964_;
+        this.leftLeg.xRot = 1.5F * Mth.triangleWave(p_102963_, 13.0F) * p_102964_;
+        this.rightLeg.yRot = 0.0F;
+        this.leftLeg.yRot = 0.0F;
     }
 
-    public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn)
-    {
-        //0super.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor, entityIn);
-        this.hayGolemHead.rotateAngleY = netHeadYaw * 0.017453292F;
-        this.hayGolemHead.rotateAngleX = headPitch * 0.017453292F;
-        this.hayGolemLeftLeg.rotateAngleX = -1.5F * this.triangleWave(limbSwing, 13.0F) * limbSwingAmount;
-        this.hayGolemRightLeg.rotateAngleX = 1.5F * this.triangleWave(limbSwing, 13.0F) * limbSwingAmount;
-        this.hayGolemLeftLeg.rotateAngleY = 0.0F;
-        this.hayGolemRightLeg.rotateAngleY = 0.0F;
+    public void prepareMobModel(T p_102957_, float p_102958_, float p_102959_, float p_102960_) {
+        int i = 10;
+        if (i > 0) {
+            this.rightArm.xRot = -2.0F + 1.5F * Mth.triangleWave((float)i - p_102960_, 10.0F);
+            this.leftArm.xRot = -2.0F + 1.5F * Mth.triangleWave((float)i - p_102960_, 10.0F);
+        } else {
+            int j = 400;
+            if (j > 0) {
+                this.rightArm.xRot = -0.8F + 0.025F * Mth.triangleWave((float)j, 70.0F);
+                this.leftArm.xRot = 0.0F;
+            } else {
+                this.rightArm.xRot = (-0.2F + 1.5F * Mth.triangleWave(p_102958_, 13.0F)) * p_102959_;
+                this.leftArm.xRot = (-0.2F - 1.5F * Mth.triangleWave(p_102958_, 13.0F)) * p_102959_;
+            }
+        }
+
     }
 
-    public void setLivingAnimations(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTickTime)
-    {
-//        EntityhayGolem entityhayGolem = (EntityhayGolem)entitylivingbaseIn;
-//        int i = entityhayGolem.getAttackTimer();
-//
-//        if (i > 0)
-//        {
-//            this.hayGolemRightArm.rotateAngleX = -2.0F + 1.5F * this.triangleWave((float)i - partialTickTime, 10.0F);
-//            this.hayGolemLeftArm.rotateAngleX = -2.0F + 1.5F * this.triangleWave((float)i - partialTickTime, 10.0F);
-//        }
-//        else
-//        {
-//            int j = entityhayGolem.getHoldRoseTick();
-//
-//            if (j > 0)
-//            {
-//                this.hayGolemRightArm.rotateAngleX = -0.8F + 0.025F * this.triangleWave((float)j, 70.0F);
-//                this.hayGolemLeftArm.rotateAngleX = 0.0F;
-//            }
-//            else
-//            {
-//                this.hayGolemRightArm.rotateAngleX = (-0.2F + 1.5F * this.triangleWave(limbSwing, 13.0F)) * limbSwingAmount;
-//                this.hayGolemLeftArm.rotateAngleX = (-0.2F - 1.5F * this.triangleWave(limbSwing, 13.0F)) * limbSwingAmount;
-//            }
-//        }
-    }
-
-    public ModelRenderer getArmForSide(EnumHandSide side)
-    {
-        return side == EnumHandSide.LEFT ? this.hayGolemLeftArm : this.hayGolemRightArm;
-    }
-
-    public void postRenderArm(float scale, EnumHandSide side)
-    {
-        ModelRenderer modelrenderer = this.getArmForSide(side);
-
-        modelrenderer.postRender(scale);
-    }
-
-    private float triangleWave(float p_78172_1_, float p_78172_2_)
-    {
-        return (Math.abs(p_78172_1_ % p_78172_2_ - p_78172_2_ * 0.5F) - p_78172_2_ * 0.25F) / (p_78172_2_ * 0.25F);
+    public ModelPart getFlowerHoldingArm() {
+        return this.rightArm;
     }
 }

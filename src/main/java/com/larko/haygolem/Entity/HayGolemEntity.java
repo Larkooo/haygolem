@@ -4,27 +4,34 @@ import com.larko.haygolem.Entity.AI.HayGolemHarvestAI;
 import com.larko.haygolem.Entity.AI.HayGolemSearchFarmAI;
 import com.larko.haygolem.Managers.FarmManager;
 import com.larko.haygolem.World.Farm;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.*;
-import net.minecraft.entity.monster.EntityGolem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.inventory.*;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumHand;
-import net.minecraft.world.World;
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class HayGolemEntity extends EntityGolem implements net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound> {
+public class HayGolemEntity extends AbstractGolem {
     public static final int CAPACITY = 27;
     public static final List<Item> USABLE_TOOLS = Arrays.asList(
             Items.WOODEN_HOE,
@@ -37,78 +44,93 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
     @Nullable
     public Farm farm;
 
-    private InventoryBasic inventory;
+    private SimpleContainer inventory;
 
-    public HayGolemEntity(World worldIn)
+    public HayGolemEntity(EntityType<? extends HayGolemEntity> type, Level worldIn)
     {
-        super(worldIn);
-        this.setSize(1.4F, 2.7F);
-        this.inventory = new InventoryBasic("HayGolem", false, CAPACITY);
-        this.inventory.addInventoryChangeListener(invBasic -> onInventoryChange());
+        super(type, worldIn);
+        //this.inventory = new Inventory("HayGolem", false, CAPACITY);
+        this.inventory = new SimpleContainer(CAPACITY);
+
+//        class listener extends ContainerListener
+//        {
+//
+//            @Override
+//            public void containerChanged(Container p_18983_) {
+//                p_18983_.
+//            }
+//        }
+//
+//        this.inventory.addListener();
+    }
+
+    public static AttributeSupplier.Builder createAttributes() {
+        return Mob.createMobAttributes()
+                .add(Attributes.MAX_HEALTH, 100.0D)
+                .add(Attributes.MOVEMENT_SPEED, 0.25D)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D)
+                .add(Attributes.ATTACK_DAMAGE, 15.0D)
+                .add(Attributes.FOLLOW_RANGE, 200);
     }
 
     @Override
-    protected void entityInit() {
-        super.entityInit();
-    }
-
-    @Override
-    protected void initEntityAI() {
-        super.initEntityAI();
+    protected void registerGoals() {
+        super.registerGoals();
         //this.tasks.addTask(1, new HayGolemHarvestAI(this, 0.4f));
-        this.tasks.addTask(0, new EntityAISwimming(this));
-        this.tasks.addTask(1, new HayGolemSearchFarmAI(this, 1.0f, 100));
-        this.tasks.addTask(2, new HayGolemHarvestAI(this,  1.0f));
-        this.tasks.addTask(3, new EntityAITempt(this, 1.0f, Item.getItemFromBlock(Blocks.HAY_BLOCK), false));
+        this.goalSelector.addGoal(0, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new HayGolemSearchFarmAI(this, 1.0f, 100));
+        this.goalSelector.addGoal(2, new HayGolemHarvestAI(this,  1.0f));
+        this.goalSelector.addGoal(3, new TemptGoal(this, 1.0f, Ingredient.of(Item.byBlock(Blocks.HAY_BLOCK)), false));
+        //this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0D));
         // broken
         // this.tasks.addTask(2, new HayGolemWanderAI(this, 0.4f));
         //this.tasks.addTask(2, new EntityAIWander(this, 0.4f));
-        this.tasks.addTask(4, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
-        this.tasks.addTask(5, new EntityAILookIdle(this));
+        this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 6.0F));
+        this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
     }
 
-    @Override
-    public void applyEntityAttributes()
-    {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(100.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25D);
-        this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(100.0D);
-    }
+//    @Override
+//    public void applyEntityAttributes()
+//    {
+//        super.entity();
+//        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(100.0D);
+//        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25D);
+//        this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1.0D);
+//        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(100.0D);
+//    }
 
-    @Override
-    public void onLivingUpdate() {
-        super.onLivingUpdate();
-//        if (this.farm != null)
-//            System.out.println(this.farm.isWithinBounds(this.getPosition()));
-        // search for a farm
-//        if (this.status == Status.SEARCHING_FARM)
-//        {
-//            for (Farm farm : FarmManager.farms)
-//            {
-//                if (this.getPosition().distanceSq(farm.getCenter()) < 40)
-//                {
-//                    this.farm = farm;
-//                    this.status = Status.IDLING;
-//                }
-//            }
-//        }
+//    @Override
+//    public void onLivingUpdate() {
+//        super.update();
+////        if (this.farm != null)
+////            System.out.println(this.farm.isWithinBounds(this.getPosition()));
+//        // search for a farm
+////        if (this.status == Status.SEARCHING_FARM)
+////        {
+////            for (Farm farm : FarmManager.farms)
+////            {
+////                if (this.getPosition().distanceSq(farm.getCenter()) < 40)
+////                {
+////                    this.farm = farm;
+////                    this.status = Status.IDLING;
+////                }
+////            }
+////        }
+//
+//
+//        //System.out.println(this.getHeldItemMainhand().toString());
+//    }
 
-
-        //System.out.println(this.getHeldItemMainhand().toString());
-    }
-
-    public InventoryBasic getInventory()
+    public SimpleContainer getInventory()
     {
         return this.inventory;
     }
 
     public boolean isInventoryFull()
     {
-        for (int i = 0; i < this.inventory.getSizeInventory(); i++)
+        for (int i = 0; i < this.inventory.getContainerSize(); i++)
         {
-            if (this.inventory.getStackInSlot(i).isEmpty())
+            if (this.inventory.getItem(i).isEmpty())
                 return false;
         }
         return true;
@@ -118,9 +140,9 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
     {
         ItemStack bestTool = null;
 
-        for (int i = 0; i < inventory.getSizeInventory(); i++)
+        for (int i = 0; i < inventory.getContainerSize(); i++)
         {
-            ItemStack itemstack = this.inventory.getStackInSlot(i);
+            ItemStack itemstack = this.inventory.getItem(i);
             if (itemstack.isEmpty() || !USABLE_TOOLS.contains(itemstack.getItem()))
                 continue;
 
@@ -141,9 +163,9 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
     @Nullable
     public ItemStack getItem(Item item)
     {
-        for (int i = 0; i < this.inventory.getSizeInventory(); i++)
+        for (int i = 0; i < this.inventory.getContainerSize(); i++)
         {
-            ItemStack itemStack = this.inventory.getStackInSlot(i);
+            ItemStack itemStack = this.inventory.getItem(i);
 
             if (!itemStack.isEmpty() && itemStack.getItem() == item)
             {
@@ -156,9 +178,9 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
 
     public boolean hasItem(Item item)
     {
-        for (int i = 0; i < this.inventory.getSizeInventory(); i++)
+        for (int i = 0; i < this.inventory.getContainerSize(); i++)
         {
-            ItemStack itemstack = this.inventory.getStackInSlot(i);
+            ItemStack itemstack = this.inventory.getItem(i);
 
             if (!itemstack.isEmpty() && itemstack.getItem() == item)
             {
@@ -171,9 +193,9 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
 
     public boolean hasPlantableItem()
     {
-        for (int i = 0; i < this.inventory.getSizeInventory(); ++i)
+        for (int i = 0; i < this.inventory.getContainerSize(); ++i)
         {
-            ItemStack itemstack = this.inventory.getStackInSlot(i);
+            ItemStack itemstack = this.inventory.getItem(i);
 
             if (!itemstack.isEmpty() &&
                     (itemstack.getItem() == Items.WHEAT_SEEDS
@@ -190,51 +212,67 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
         return false;
     }
 
-    public void onInventoryChange()
+    public void onInventoryChange(int slot)
     {
         ItemStack tool = hasToolInInventory();
         if (tool == null)
             return;
 
-        this.setHeldItem(EnumHand.MAIN_HAND, tool);
+//        this.equipItemIfPossible(EnumHand.MAIN_HAND, tool);
     }
 
     @Override
-    public void onDeath(DamageSource cause) {
-        super.onDeath(cause);
+    protected void dropCustomDeathLoot(DamageSource p_21385_, int p_21386_, boolean p_21387_) {
+        super.dropCustomDeathLoot(p_21385_, p_21386_, p_21387_);
 
-        for (int i = 0; i < this.inventory.getSizeInventory(); i++)
+        for (int i = 0; i < this.inventory.getContainerSize(); i++)
         {
-            ItemStack itemStack = this.inventory.getStackInSlot(i);
+            ItemStack itemStack = this.inventory.getItem(i);
             if (itemStack.isEmpty())
                 continue;
 
-            this.dropItem(itemStack.getItem(), itemStack.getCount());
+            this.spawnAtLocation(itemStack.getItem(), itemStack.getCount());
         }
 
         if (this.farm != null)
             this.farm.workersCount--;
     }
 
-    @Override
-    public void readFromNBT(NBTTagCompound compound) {
-        super.readFromNBT(compound);
-        NBTTagList nbttaglist = compound.getTagList("Inventory", 10);
+//    @Override
+//    public void onDeath(DamageSource cause) {
+//        super.onDeath(cause);
+//
+//        for (int i = 0; i < this.inventory.getSizeInventory(); i++)
+//        {
+//            ItemStack itemStack = this.inventory.getStackInSlot(i);
+//            if (itemStack.isEmpty())
+//                continue;
+//
+//            this.dropItem(itemStack.getItem(), itemStack.getCount());
+//        }
+//
+//        if (this.farm != null)
+//            this.farm.workersCount--;
+//    }
 
-        for (int i = 0; i < nbttaglist.tagCount(); ++i)
-        {
-            ItemStack itemstack = new ItemStack(nbttaglist.getCompoundTagAt(i));
+    public void addAdditionalSaveData(CompoundTag data) {
+        super.addAdditionalSaveData(data);
 
-            if (!itemstack.isEmpty())
-            {
-                this.inventory.addItem(itemstack);
-            }
-        }
-
+        data.put("Inventory", this.inventory.createTag());
         // farm
+        if (this.farm != null)
+            data.putString("farm", this.farm.getUuid().toString());
+    }
+
+    public void readAdditionalSaveData(CompoundTag data) {
+        super.readAdditionalSaveData(data);
+        ListTag tagList = data.getList("Inventory", 10);
+
+        this.inventory.fromTag(tagList);
+
         try
         {
-            this.farm = FarmManager.findByUuid(UUID.fromString(compound.getString("farm")));
+            this.farm = FarmManager.findByUuid(UUID.fromString(data.getString("farm")));
             if (this.farm != null)
                 this.farm.workersCount++;
         }
@@ -242,28 +280,5 @@ public class HayGolemEntity extends EntityGolem implements net.minecraftforge.co
         {
             this.farm = null;
         }
-
-        //this.setCanPickUpLoot(true);
-    }
-
-    @Override
-    public void writeEntityToNBT(NBTTagCompound compound) {
-        super.writeEntityToNBT(compound);
-        NBTTagList nbttaglist = new NBTTagList();
-
-        for (int i = 0; i < this.inventory.getSizeInventory(); ++i)
-        {
-            ItemStack itemstack = this.inventory.getStackInSlot(i);
-
-            if (!itemstack.isEmpty())
-            {
-                nbttaglist.appendTag(itemstack.writeToNBT(new NBTTagCompound()));
-            }
-        }
-
-        compound.setTag("Inventory", nbttaglist);
-        // farm
-        if (this.farm != null)
-            compound.setString("farm", this.farm.getUuid().toString());
     }
 }

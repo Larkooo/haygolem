@@ -1,35 +1,23 @@
 package com.larko.haygolem.Managers;
 
 import com.larko.haygolem.Entity.HayGolemEntity;
+import com.larko.haygolem.Handlers.RegistryHandler;
 import com.larko.haygolem.Util.Metadata;
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockHay;
-import net.minecraft.block.BlockPumpkin;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.BlockWorldState;
-import net.minecraft.block.state.pattern.BlockMaterialMatcher;
-import net.minecraft.block.state.pattern.BlockPattern;
-import net.minecraft.block.state.pattern.BlockStateMatcher;
-import net.minecraft.block.state.pattern.FactoryBlockPattern;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.entity.monster.EntityIronGolem;
-import net.minecraft.entity.monster.EntitySnowman;
-import net.minecraft.entity.passive.EntityCow;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemEgg;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldEntitySpawner;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.HayBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.level.block.state.pattern.BlockPattern;
+import net.minecraft.world.level.block.state.pattern.BlockPatternBuilder;
+import net.minecraft.world.level.block.state.predicate.BlockStatePredicate;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,12 +25,12 @@ import java.util.List;
 @Mod.EventBusSubscriber(modid=Metadata.MODID)
 public class GolemManager {
 
-    public static BlockPattern pattern = FactoryBlockPattern
+    public static BlockPattern pattern = BlockPatternBuilder
             .start()
             .aisle("~ ~", "###", "~#~")
             //.where('^', BlockWorldState.hasState(IS_PUMPKIN))
-            .where('#', BlockWorldState.hasState(BlockStateMatcher.forBlock(Blocks.IRON_BLOCK)))
-            .where('~', BlockWorldState.hasState(BlockMaterialMatcher.forMaterial(Material.AIR)))
+            .where('#', BlockInWorld.hasState(BlockStatePredicate.forBlock(Blocks.IRON_BLOCK)))
+            .where('~', BlockInWorld.hasState(BlockStatePredicate.forBlock(Blocks.AIR)))
             .build();
 
     private static ArrayList<HayGolemEntity> entities = new ArrayList<>();
@@ -53,51 +41,40 @@ public class GolemManager {
     //  -
     @SubscribeEvent
     public static void onPlaceEvent(BlockEvent.EntityPlaceEvent event) {
-        if (!(event.getEntity() instanceof EntityPlayerMP))
+        if (!(event.getEntity() instanceof ServerPlayer))
             return;
 
         Block placedBlock = event.getPlacedBlock().getBlock();
-        Block underBlock = event.getWorld().getBlockState(event.getPos().down()).getBlock();
-        World worldIn = event.getWorld();
+        Block underBlock = event.getWorld().getBlockState(event.getPos().below()).getBlock();
+        LevelAccessor worldIn = event.getWorld();
         // check if block is hay, and if it has been placed on top of an iron block
         // if not, return
-        if (!(placedBlock instanceof BlockHay && underBlock.getRegistryName().getResourcePath().equals("iron_block")))
+        if (!(placedBlock instanceof HayBlock && underBlock.getRegistryName().getPath().equals("iron_block")))
             return;
 
-        // now check for the golem spawn structure pattern
-        BlockPattern.PatternHelper patternHelper = pattern.match(event.getWorld(), event.getPos());
-        if (patternHelper == null)
-            return;
+        BlockPattern.BlockPatternMatch blockPatternMatch = pattern.find(event.getEntity().getLevel(), event.getBlockSnapshot().getPos());
 
-        // replace blocks by air
-        for (int j = 0; j < pattern.getPalmLength(); ++j)
-        {
-            for (int k = 0; k < pattern.getThumbLength(); ++k)
-            {
-                worldIn.setBlockState(patternHelper.translateOffset(j, k, 0).getPos(), Blocks.AIR.getDefaultState(), 2);
+        for(int j = 0; j < pattern.getWidth(); ++j) {
+            for(int k = 0; k < pattern.getHeight(); ++k) {
+                BlockInWorld blockinworld2 = blockPatternMatch.getBlock(j, k, 0);
+                worldIn.setBlock(blockinworld2.getPos(), Blocks.AIR.defaultBlockState(), 2);
+                worldIn.levelEvent(2001, blockinworld2.getPos(), Block.getId(blockinworld2.getState()));
             }
         }
 
-        BlockPos blockpos = patternHelper.translateOffset(1, 2, 0).getPos();
-        HayGolemEntity hayGolem = new HayGolemEntity(worldIn);
-        hayGolem.setLocationAndAngles((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.05D, (double)blockpos.getZ() + 0.5D, 0.0F, 0.0F);
-        worldIn.spawnEntity(hayGolem);
-//        for (EntityPlayerMP entityplayermp1 : worldIn.getEntitiesWithinAABB(EntityPlayerMP.class, hayGolemEntity.getEntityBoundingBox().grow(5.0D)))
-//        {
-//            CriteriaTriggers.SUMMONED_ENTITY.trigger(entityplayermp1, hayGolemEntity);
+        BlockPos blockpos = blockPatternMatch.getBlock(1, 2, 0).getPos();
+        HayGolemEntity hayGolem = RegistryHandler.HAY_GOLEM.get().create((Level)worldIn);
+        hayGolem.moveTo((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.05D, (double)blockpos.getZ() + 0.5D, 0.0F, 0.0F);
+        worldIn.addFreshEntity(hayGolem);
+
+//        for(ServerPlayer serverplayer1 : worldIn.getEntitiesOfClass(ServerPlayer.class, worldIn.getBoundingBox().inflate(5.0D))) {
+//            CriteriaTriggers.SUMMONED_ENTITY.trigger(serverplayer1, irongolem);
 //        }
 
-        for (int j1 = 0; j1 < 120; ++j1)
-        {
-            worldIn.spawnParticle(EnumParticleTypes.SNOWBALL, (double)blockpos.getX() + worldIn.rand.nextDouble(), (double)blockpos.getY() + worldIn.rand.nextDouble() * 3.9D, (double)blockpos.getZ() + worldIn.rand.nextDouble(), 0.0D, 0.0D, 0.0D);
-        }
-
-        for (int k1 = 0; k1 < pattern.getPalmLength(); ++k1)
-        {
-            for (int l1 = 0; l1 < pattern.getThumbLength(); ++l1)
-            {
-                BlockWorldState blockworldstate1 = patternHelper.translateOffset(k1, l1, 0);
-                worldIn.notifyNeighborsRespectDebug(blockworldstate1.getPos(), Blocks.AIR, false);
+        for(int i1 = 0; i1 < pattern.getWidth(); ++i1) {
+            for(int j1 = 0; j1 < pattern.getHeight(); ++j1) {
+                BlockInWorld blockinworld1 = blockPatternMatch.getBlock(i1, j1, 0);
+                worldIn.blockUpdated(blockinworld1.getPos(), Blocks.AIR);
             }
         }
     }

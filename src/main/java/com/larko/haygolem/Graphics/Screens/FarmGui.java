@@ -1,30 +1,34 @@
 package com.larko.haygolem.Graphics.Screens;
 
 import com.larko.haygolem.Entity.HayGolemEntity;
+import com.larko.haygolem.Handlers.RegistryHandler;
 import com.larko.haygolem.World.Farm;
-import net.minecraft.block.BlockChest;
-import net.minecraft.block.BlockCrops;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.inventory.GuiInventory;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.client.settings.GameSettings;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.MultiLineLabel;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.CropBlock;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.IPlantable;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.URI;
 
-@SideOnly(Side.CLIENT)
-public class FarmGui extends GuiScreen
+@OnlyIn(Dist.CLIENT)
+public class FarmGui extends Screen
 {
     Farm farm;
 
@@ -33,54 +37,50 @@ public class FarmGui extends GuiScreen
 
     public FarmGui(Farm farm)
     {
+        super(new TextComponent("Farm"));
         this.farm = farm;
     }
 
-    public void initGui()
+    public void init()
     {
-        this.buttonList.clear();
-        this.buttonList.add(new GuiButton(1, this.width / 2 - 116, this.height / 2 + 62 + -16, 228, 20, "Done"));
+        int i = -16;
+        this.addRenderableWidget(new Button(this.width / 2 - 116, this.height / 2 + 62 + -16, 228, 20, new TextComponent("Done"), (p_95948_) -> {
+            this.minecraft.setScreen((Screen)null);
+            this.minecraft.mouseHandler.grabMouse();
+        }));
     }
 
-    protected void actionPerformed(GuiButton button) throws IOException
+    public void renderBackground(PoseStack p_95941_)
     {
-        switch (button.id)
-        {
-            case 1:
-                this.mc.displayGuiScreen((GuiScreen)null);
-                this.mc.setIngameFocus();
-        }
-    }
-
-    public void drawDefaultBackground()
-    {
-        super.drawDefaultBackground();
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        this.mc.getTextureManager().bindTexture(DEMO_BACKGROUND_LOCATION);
+        super.renderBackground(p_95941_);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, DEMO_BACKGROUND_LOCATION);
         int i = (this.width - 248) / 2;
         int j = (this.height - 166) / 2;
-        this.drawTexturedModalRect(i, j, 0, 0, 248, 166);
+        this.blit(p_95941_, i, j, 0, 0, 248, 166);
     }
 
-    public void drawScreen(int mouseX, int mouseY, float partialTicks)
+    public void render(PoseStack p_95943_, int mouseX, int mouseY, float partialTicks)
     {
-        this.drawDefaultBackground();
+        this.renderBackground(p_95943_);
+
         int i = (this.width - 248) / 2 + 10;
         int j = (this.height - 166) / 2 + 8;
-        this.fontRenderer.drawString(this.farm.getPlayer() != null ? this.farm.getPlayer().getDisplayNameString() + "'s farm" : "Farm", i, j, 2039583);
+        //this.fontRenderer.drawString(this.farm.getPlayer() != null ? this.farm.getPlayer().getDisplayNameString() + "'s farm" : "Farm", i, j, 2039583);
         j = j + 12;
-        GameSettings gamesettings = this.mc.gameSettings;
-        if (this.farm.getPlayer() != null)
-            this.fontRenderer.drawString("Owner : " + this.farm.getPlayer().getDisplayNameString(), i, j, 5197647);
-        this.fontRenderer.drawString("Assigned hay golems : " + this.farm.workersCount, i, j + 12, 5197647);
+        //GameSettings gamesettings = this.minecraft.se;
+//        if (this.farm.getPlayer() != null)
+//            this.fontRenderer.drawString("Owner : " + this.farm.getPlayer().getDisplayNameString(), i, j, 5197647);
+
+        MultiLineLabel.create(this.font, new TextComponent("Assigned hay golems : " + this.farm.workersCount)).renderLeftAligned(p_95943_, i, j+12, 12, 5197647);
         for (int n = 0; n < this.farm.workersCount; n++)
         {
-            GuiInventory.drawEntityOnScreen((n * 30) + i + 20, j + 100, 17, (float)(i + 51) - mouseX, (float)(j + 75 - 50) - mouseY, new HayGolemEntity(mc.world));
+            InventoryScreen.renderEntityInInventory((n * 30) + i + 20, j + 100, 17, (float)(i + 51) - mouseX, (float)(j + 75 - 50) - mouseY, RegistryHandler.HAY_GOLEM.get().create(this.minecraft.level));
         }
 
         BlockPos startingPos = this.farm.getStartingPos();
         Vec3i farmSize = this.farm.getSize();
-        BlockPos endingPos = startingPos.add(this.farm.getSize());
+        BlockPos endingPos = startingPos.offset(this.farm.getSize());
 
         int chests = 0;
         int crops = 0;
@@ -93,17 +93,17 @@ public class FarmGui extends GuiScreen
                 {
                     BlockPos pos = new BlockPos(x, y, z);
 
-                    if (mc.world.getBlockState(pos).getBlock() instanceof BlockChest)
+                    if (this.minecraft.level.getBlockState(pos).getBlock() instanceof ChestBlock)
                         chests++;
-                    else if (mc.world.getBlockState(pos).getBlock() instanceof BlockCrops)
+                    else if (this.minecraft.level.getBlockState(pos).getBlock() instanceof CropBlock)
                         crops++;
                 }
             }
         }
 
-        this.fontRenderer.drawString("Chests : " + chests, i, j + 24, 5197647);
-        this.fontRenderer.drawString("Crops : " + crops, i, j + 36, 5197647);
+        MultiLineLabel.create(this.font, new TextComponent("Chests : " + chests)).renderLeftAligned(p_95943_, i, j+24, 12, 5197647);
+        MultiLineLabel.create(this.font, new TextComponent("Crops : " + crops)).renderLeftAligned(p_95943_, i, j+24, 12, 5197647);
         //this.fontRenderer.drawSplitString(I18n.format("demo.help.fullWrapped"), i, j + 68, 218, 2039583);
-        super.drawScreen(mouseX, mouseY, partialTicks);
+        super.render(p_95943_, mouseX, mouseY, partialTicks);
     }
 }

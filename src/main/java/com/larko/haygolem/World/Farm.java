@@ -1,11 +1,10 @@
 package com.larko.haygolem.World;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +45,7 @@ public class Farm {
 
     public boolean isWithinBounds(BlockPos pos)
     {
-        Vec3i endingPos = startingPos.add(this.size);
+        Vec3i endingPos = startingPos.offset(this.size);
         // if size is negative, then the position should be bigger than the ending pos
         return (size.getX() < 0 ?
                 pos.getX() <= startingPos.getX() &&
@@ -72,9 +71,9 @@ public class Farm {
         return this.uuid;
     }
 
-    public EntityPlayer getPlayer()
+    public Player getPlayer()
     {
-        return Minecraft.getMinecraft().world.getPlayerEntityByUUID(ownerUuid);
+        return Minecraft.getInstance().level.getPlayerByUUID(ownerUuid);
     }
 
     public BlockPos getStartingPos()
@@ -90,15 +89,15 @@ public class Farm {
     public BlockPos getCenter()
     {
         Vec3i halfSize = new Vec3i(size.getX() / 2, size.getY() / 2, size.getZ() / 2);
-        return startingPos.add(halfSize);
+        return startingPos.offset(halfSize);
     }
 
-    public NBTTagCompound serialize()
+    public CompoundTag serialize()
     {
-        NBTTagCompound tag = new NBTTagCompound();
+        CompoundTag tag = new CompoundTag();
 
-        tag.setString("UUID", this.uuid.toString());
-        tag.setString("OWNERUUID", this.ownerUuid.toString());
+        tag.putString("UUID", this.uuid.toString());
+        tag.putString("OWNERUUID", this.ownerUuid.toString());
 
         int[] farmData = {
                 this.startingPos.getX(),
@@ -111,12 +110,12 @@ public class Farm {
 
                 this.dimensionId
         };
-        tag.setIntArray("FARMDATA", farmData);
+        tag.putIntArray("FARMDATA", farmData);
 
         return tag;
     }
 
-    public static Farm deserialize(NBTTagCompound tag)
+    public static Farm deserialize(CompoundTag tag)
     {
         UUID uuid = UUID.fromString(tag.getString("UUID"));
         // pos (3), size (3), dimension (1)

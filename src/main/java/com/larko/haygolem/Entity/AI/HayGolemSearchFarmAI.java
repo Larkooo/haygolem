@@ -3,15 +3,14 @@ package com.larko.haygolem.Entity.AI;
 import com.larko.haygolem.Entity.HayGolemEntity;
 import com.larko.haygolem.Managers.FarmManager;
 import com.larko.haygolem.World.Farm;
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.ai.goal.Goal;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 
-public class HayGolemSearchFarmAI extends EntityAIBase
+public class HayGolemSearchFarmAI extends Goal
 {
     private final HayGolemEntity hayGolem;
     private final double movementSpeed;
@@ -25,10 +24,11 @@ public class HayGolemSearchFarmAI extends EntityAIBase
         this.hayGolem = hayGolem;
         this.movementSpeed = speedIn;
         this.searchLength = length;
-        this.setMutexBits(5);
+        this.setFlags(EnumSet.of(Goal.Flag.MOVE, Flag.JUMP));
     }
 
-    public boolean shouldExecute()
+    @Override
+    public boolean canUse()
     {
         if (this.runDelay > 0)
         {
@@ -37,8 +37,8 @@ public class HayGolemSearchFarmAI extends EntityAIBase
         }
         else
         {
-            this.runDelay = 200 + this.hayGolem.getRNG().nextInt(200);
-            if (this.hayGolem.farm != null && !this.hayGolem.farm.isWithinBounds(this.hayGolem.getPosition()))
+            this.runDelay = 200 + this.hayGolem.getRandom().nextInt(200);
+            if (this.hayGolem.farm != null && !this.hayGolem.farm.isWithinBounds(this.hayGolem.blockPosition()))
                 return true;
             else if (this.hayGolem.farm == null && this.searchForDestination())
                 return true;
@@ -47,39 +47,42 @@ public class HayGolemSearchFarmAI extends EntityAIBase
         }
     }
 
-    public boolean shouldContinueExecuting()
+    @Override
+    public boolean canContinueToUse()
     {
-        return this.timeoutCounter >= -this.maxStayTicks && this.timeoutCounter <= 1200 && this.hayGolem.farm != null && !this.hayGolem.farm.isWithinBounds(this.hayGolem.getPosition());
+        return this.timeoutCounter >= -this.maxStayTicks && this.timeoutCounter <= 1200 && this.hayGolem.farm != null && !this.hayGolem.farm.isWithinBounds(this.hayGolem.blockPosition());
     }
 
-    public void startExecuting()
+    @Override
+    public void start()
     {
         BlockPos dest = this.hayGolem.farm.getCenter();
-        this.hayGolem.getNavigator().tryMoveToXYZ(
+        this.hayGolem.getNavigation().moveTo(
                 (double)((float)dest.getX()) + 0.5D,
             (double)((float)dest.getY() + 1),
             (double)((float)dest.getZ()) + 0.5D, this.movementSpeed);
 
         this.timeoutCounter = 0;
-        this.maxStayTicks = this.hayGolem.getRNG().nextInt(this.hayGolem.getRNG().nextInt(1200) + 1200) + 1200;
+        this.maxStayTicks = this.hayGolem.getRandom().nextInt(this.hayGolem.getRandom().nextInt(1200) + 1200) + 1200;
     }
 
-    public void updateTask()
+    @Override
+    public void tick()
     {
-        if (!this.hayGolem.farm.isWithinBounds(new BlockPos(this.hayGolem)))
+        if (!this.hayGolem.farm.isWithinBounds(this.hayGolem.blockPosition()))
         {
             ++this.timeoutCounter;
 
             if (this.timeoutCounter % 5 == 0)
             {
                 BlockPos dest = this.hayGolem.farm.getCenter();
-                this.hayGolem.getNavigator().tryMoveToXYZ((double)((float)dest.getX()) + 0.5D, (double)(dest.getY() + 1), (double)((float)dest.getZ()) + 0.5D, this.movementSpeed);
+                this.hayGolem.getNavigation().moveTo((double)((float)dest.getX()) + 0.5D, (double)(dest.getY() + 1), (double)((float)dest.getZ()) + 0.5D, this.movementSpeed);
             }
         }
         else
         {
             --this.timeoutCounter;
-            this.hayGolem.getNavigator().clearPath();
+            this.hayGolem.getNavigation().stop();
         }
     }
 
@@ -94,22 +97,22 @@ public class HayGolemSearchFarmAI extends EntityAIBase
         for (int i = 1; i < FarmManager.farms.size(); i++)
         {
             Farm farm = FarmManager.farms.get(i);
-            double dist = this.hayGolem.getDistance(
+            double dist = Math.sqrt(this.hayGolem.distanceToSqr(
                     farm.getCenter().getX(),
                     farm.getCenter().getY(),
-                    farm.getCenter().getZ());
+                    farm.getCenter().getZ()));
 
-            if (this.hayGolem.getDistance(
+            if (Math.sqrt(this.hayGolem.distanceToSqr(
                     closest.getCenter().getX(),
                     closest.getCenter().getY(),
-                    closest.getCenter().getZ()) > dist)
+                    closest.getCenter().getZ())) > dist)
                 closest = FarmManager.farms.get(i);
         }
 
-        if (this.hayGolem.getDistance(
+        if (Math.sqrt(this.hayGolem.distanceToSqr(
                 closest.getCenter().getX(),
                 closest.getCenter().getY(),
-                closest.getCenter().getZ()) < this.searchLength)
+                closest.getCenter().getZ())) < this.searchLength)
         {
             this.hayGolem.farm = closest;
             this.hayGolem.farm.workersCount++;

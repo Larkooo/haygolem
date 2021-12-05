@@ -1,36 +1,35 @@
 package com.larko.haygolem.Entity.AI;
 
 import com.larko.haygolem.Entity.HayGolemEntity;
-import net.minecraft.block.*;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.inventory.InventoryBasic;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
-import javax.swing.plaf.basic.BasicComboBoxUI;
+import java.util.EnumSet;
 import java.util.List;
 
-public class HayGolemHarvestAI extends EntityAIBase
+public class HayGolemHarvestAI extends Goal
 {
     private final HayGolemEntity hayGolem;
     private final double movementSpeed;
     protected int runDelay;
     private int timeoutCounter;
     private int maxStayTicks;
-    protected BlockPos destinationBlock = BlockPos.ORIGIN;
+    protected BlockPos destinationBlock = BlockPos.ZERO;
     private boolean closeToDestination;
 
     enum Task
@@ -53,10 +52,11 @@ public class HayGolemHarvestAI extends EntityAIBase
     {
         this.hayGolem = hayGolem;
         this.movementSpeed = speedIn;
-        this.setMutexBits(5);
+        this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
 
-    public boolean shouldExecute()
+    @Override
+    public boolean canUse()
     {
         if (this.runDelay > 0)
         {
@@ -65,35 +65,38 @@ public class HayGolemHarvestAI extends EntityAIBase
         }
         else
         {
-            this.runDelay = 10 + this.hayGolem.getRNG().nextInt(10);
+            this.runDelay = 10 + this.hayGolem.getRandom().nextInt(10);
             return this.hayGolem.farm != null && this.searchForDestination();
         }
     }
 
-    public boolean shouldContinueExecuting()
+    @Override
+    public boolean canContinueToUse()
     {
-        return this.hayGolem.farm != null && this.currentTask != Task.IDLING && this.timeoutCounter >= -this.maxStayTicks && this.timeoutCounter <= 1200 && this.shouldMoveTo(this.hayGolem.world, this.destinationBlock);
+        return this.hayGolem.farm != null && this.currentTask != Task.IDLING && this.timeoutCounter >= -this.maxStayTicks && this.timeoutCounter <= 1200 && this.shouldMoveTo(this.hayGolem.level, this.destinationBlock);
     }
 
-    public void startExecuting()
+    @Override
+    public void start()
     {
-        this.hayGolem.getNavigator().tryMoveToXYZ((double)((float)this.destinationBlock.getX()) + 0.5D, (double)(this.destinationBlock.getY() + 1), (double)((float)this.destinationBlock.getZ()) + 0.5D, this.movementSpeed);
+        this.hayGolem.getNavigation().moveTo((double)((float)this.destinationBlock.getX()) + 0.5D, (double)(this.destinationBlock.getY() + 1), (double)((float)this.destinationBlock.getZ()) + 0.5D, this.movementSpeed);
         this.timeoutCounter = 0;
-        this.maxStayTicks = this.hayGolem.getRNG().nextInt(this.hayGolem.getRNG().nextInt(1200) + 1200) + 1200;
+        this.maxStayTicks = this.hayGolem.getRandom().nextInt(this.hayGolem.getRandom().nextInt(1200) + 1200) + 1200;
     }
 
-    public void updateTask()
+    @Override
+    public void tick()
     {
         this.hayGolem.farm.focusedBlocks.remove(this.destinationBlock);
 
-        if (Math.sqrt(this.hayGolem.getDistanceSq(this.destinationBlock.up())) > 3.0 || (this.currentTask == Task.HARVEST_CACTUS && Math.sqrt(this.hayGolem.getDistanceSq(this.destinationBlock.up())) > 6.0))
+        if (Math.sqrt(this.hayGolem.distanceToSqr(new Vec3(this.destinationBlock.above().getX(), this.destinationBlock.above().getY(), this.destinationBlock.above().getZ()))) > 3.0 || (this.currentTask == Task.HARVEST_CACTUS && Math.sqrt(this.hayGolem.distanceToSqr(new Vec3(this.destinationBlock.above().getX(), this.destinationBlock.above().getY(), this.destinationBlock.above().getZ()))) > 6.0))
         {
             this.closeToDestination = false;
             ++this.timeoutCounter;
 
             if (this.timeoutCounter % 40 == 0)
             {
-                this.hayGolem.getNavigator().tryMoveToXYZ((double)((float)this.destinationBlock.getX()) + 0.5D, (double)(this.destinationBlock.getY() + 1), (double)((float)this.destinationBlock.getZ()) + 0.5D, this.movementSpeed);
+                this.hayGolem.getNavigation().moveTo((double)((float)this.destinationBlock.getX()) + 0.5D, (double)(this.destinationBlock.getY() + 1), (double)((float)this.destinationBlock.getZ()) + 0.5D, this.movementSpeed);
             }
         }
         else
@@ -105,35 +108,35 @@ public class HayGolemHarvestAI extends EntityAIBase
 
         if (this.closeToDestination)
         {
-            this.hayGolem.getLookHelper().setLookPosition((double)this.destinationBlock.getX() + 0.5D, (double)(this.destinationBlock.getY() + 1), (double)this.destinationBlock.getZ() + 0.5D, 10.0F, (float)this.hayGolem.getVerticalFaceSpeed());
+            this.hayGolem.getLookControl().setLookAt((double)this.destinationBlock.getX() + 0.5D, (double)(this.destinationBlock.getY() + 1), (double)this.destinationBlock.getZ() + 0.5D, 10.0F, (float)this.hayGolem.getMaxHeadXRot());
 
-            World world = this.hayGolem.world;
-            BlockPos blockpos = this.destinationBlock.up();
-            IBlockState iblockstate = world.getBlockState(blockpos);
+            Level world = this.hayGolem.level;
+            BlockPos blockpos = this.destinationBlock.above();
+            BlockState iblockstate = world.getBlockState(blockpos);
             Block block = iblockstate.getBlock();
 
-            if (this.currentTask == Task.USE_BONEMEAL && block instanceof BlockCrops)
+            if (this.currentTask == Task.USE_BONEMEAL && block instanceof CropBlock)
             {
-                for (int i = 0; i < this.hayGolem.getInventory().getSizeInventory(); i++)
+                for (int i = 0; i < this.hayGolem.getInventory().getContainerSize(); i++)
                 {
-                    ItemStack itemStack = this.hayGolem.getInventory().getStackInSlot(i);
+                    ItemStack itemStack = this.hayGolem.getInventory().getItem(i);
 
-                    if (!itemStack.isEmpty() && itemStack.getItem() == Items.DYE && itemStack.getMetadata() == 15)
+                    if (!itemStack.isEmpty() && itemStack.getItem() == Items.BONE_MEAL)
                     {
-                        ((BlockCrops) block).grow(world, blockpos, iblockstate);
+                        ((CropBlock) block).growCrops(world, blockpos, iblockstate);
 
                         itemStack.shrink(1);
                         if (itemStack.isEmpty())
                         {
-                            this.hayGolem.getInventory().setInventorySlotContents(i, ItemStack.EMPTY);
+                            this.hayGolem.getInventory().setItem(i, ItemStack.EMPTY);
                         }
                         break;
                     }
                 }
             }
-            else if (this.currentTask == Task.HARVEST_CROPS && block instanceof BlockCrops && ((BlockCrops)block).isMaxAge(iblockstate))
+            else if (this.currentTask == Task.HARVEST_CROPS && block instanceof CropBlock && ((CropBlock)block).isMaxAge(iblockstate))
             {
-                List<ItemStack> drops = world.getBlockState(blockpos).getBlock().getDrops(world, blockpos, world.getBlockState(blockpos), 0);
+                List<ItemStack> drops = iblockstate.getBlock().getDrops(iblockstate, (ServerLevel) world, blockpos, null);
                 for (ItemStack drop : drops)
                     this.hayGolem.getInventory().addItem(drop);
 
@@ -141,33 +144,33 @@ public class HayGolemHarvestAI extends EntityAIBase
             }
             else if (this.currentTask == Task.PLANT_CROPS && iblockstate.getMaterial() == Material.AIR)
             {
-                InventoryBasic inventorybasic = this.hayGolem.getInventory();
+                SimpleContainer inventorybasic = this.hayGolem.getInventory();
 
-                for (int i = 0; i < inventorybasic.getSizeInventory(); ++i)
+                for (int i = 0; i < inventorybasic.getContainerSize(); ++i)
                 {
-                    ItemStack itemstack = inventorybasic.getStackInSlot(i);
+                    ItemStack itemstack = inventorybasic.getItem(i);
                     boolean usedItem = false;
 
                     if (!itemstack.isEmpty())
                     {
                         if (itemstack.getItem() == Items.WHEAT_SEEDS)
                         {
-                            world.setBlockState(blockpos, Blocks.WHEAT.getDefaultState(), 3);
+                            world.setBlock(blockpos, Blocks.WHEAT.defaultBlockState(), 3);
                             usedItem = true;
                         }
                         else if (itemstack.getItem() == Items.POTATO)
                         {
-                            world.setBlockState(blockpos, Blocks.POTATOES.getDefaultState(), 3);
+                            world.setBlock(blockpos, Blocks.POTATOES.defaultBlockState(), 3);
                             usedItem = true;
                         }
                         else if (itemstack.getItem() == Items.CARROT)
                         {
-                            world.setBlockState(blockpos, Blocks.CARROTS.getDefaultState(), 3);
+                            world.setBlock(blockpos, Blocks.CARROTS.defaultBlockState(), 3);
                             usedItem = true;
                         }
                         else if (itemstack.getItem() == Items.BEETROOT_SEEDS)
                         {
-                            world.setBlockState(blockpos, Blocks.BEETROOTS.getDefaultState(), 3);
+                            world.setBlock(blockpos, Blocks.BEETROOTS.defaultBlockState(), 3);
                             usedItem = true;
                         }
                     }
@@ -178,44 +181,44 @@ public class HayGolemHarvestAI extends EntityAIBase
 
                         if (itemstack.isEmpty())
                         {
-                            inventorybasic.setInventorySlotContents(i, ItemStack.EMPTY);
+                            inventorybasic.setItem(i, ItemStack.EMPTY);
                         }
 
                         break;
                     }
                 }
             }
-            else if (this.currentTask == Task.HARVEST_SPECIFIC_BLOCKS && (block instanceof BlockMelon || block instanceof BlockPumpkin))
+            else if (this.currentTask == Task.HARVEST_SPECIFIC_BLOCKS && (block instanceof MelonBlock || block instanceof PumpkinBlock))
             {
-                List<ItemStack> drops = world.getBlockState(blockpos).getBlock().getDrops(world, blockpos, world.getBlockState(blockpos), 0);
+                List<ItemStack> drops = iblockstate.getBlock().getDrops(iblockstate, (ServerLevel) world, blockpos, null);
                 for (ItemStack drop : drops)
                     this.hayGolem.getInventory().addItem(drop);
 
                 world.destroyBlock(blockpos, false);
             }
             else if ((this.currentTask == Task.PLANT_REEDS || this.currentTask == Task.PLANT_CACTUS) && iblockstate.getMaterial() == Material.AIR &&
-                    (this.currentTask == Task.PLANT_CACTUS ? !(world.getBlockState(blockpos.north()).getMaterial().blocksMovement() ||
-                            world.getBlockState(blockpos.south()).getMaterial().blocksMovement() ||
-                            world.getBlockState(blockpos.west()).getMaterial().blocksMovement() ||
-                            world.getBlockState(blockpos.east()).getMaterial().blocksMovement()) : true))
+                    (this.currentTask == Task.PLANT_CACTUS ? !(world.getBlockState(blockpos.north()).getMaterial().blocksMotion() ||
+                            world.getBlockState(blockpos.south()).getMaterial().blocksMotion() ||
+                            world.getBlockState(blockpos.west()).getMaterial().blocksMotion() ||
+                            world.getBlockState(blockpos.east()).getMaterial().blocksMotion()) : true))
             {
-                InventoryBasic inventorybasic = this.hayGolem.getInventory();
+                SimpleContainer inventorybasic = this.hayGolem.getInventory();
 
-                for (int i = 0; i < inventorybasic.getSizeInventory(); ++i)
+                for (int i = 0; i < inventorybasic.getContainerSize(); ++i)
                 {
-                    ItemStack itemstack = inventorybasic.getStackInSlot(i);
+                    ItemStack itemstack = inventorybasic.getItem(i);
                     boolean usedItem = false;
 
                     if (!itemstack.isEmpty())
                     {
-                        if (itemstack.getItem() == Items.REEDS && this.currentTask == Task.PLANT_REEDS)
+                        if (itemstack.getItem() == Items.SUGAR_CANE && this.currentTask == Task.PLANT_REEDS)
                         {
-                            world.setBlockState(blockpos, Blocks.REEDS.getDefaultState(), 3);
+                            world.setBlock(blockpos, Blocks.SUGAR_CANE.defaultBlockState(), 3);
                             usedItem = true;
                         }
-                        else if (itemstack.getItem() == Item.getItemFromBlock(Blocks.CACTUS) && this.currentTask == Task.PLANT_CACTUS)
+                        else if (itemstack.getItem() == Item.byBlock(Blocks.CACTUS) && this.currentTask == Task.PLANT_CACTUS)
                         {
-                            world.setBlockState(blockpos, Blocks.CACTUS.getDefaultState(), 3);
+                            world.setBlock(blockpos, Blocks.CACTUS.defaultBlockState(), 3);
                             usedItem = true;
                         }
                     }
@@ -226,7 +229,7 @@ public class HayGolemHarvestAI extends EntityAIBase
 
                         if (itemstack.isEmpty())
                         {
-                            inventorybasic.setInventorySlotContents(i, ItemStack.EMPTY);
+                            inventorybasic.setItem(i, ItemStack.EMPTY);
                         }
 
                         break;
@@ -234,32 +237,32 @@ public class HayGolemHarvestAI extends EntityAIBase
                 }
             }
             else if ((this.currentTask == Task.HARVEST_REEDS || this.currentTask == Task.HARVEST_CACTUS) &&
-                    this.currentTask == Task.HARVEST_REEDS ? world.getBlockState(blockpos.up()).getBlock() instanceof BlockReed
-                    : world.getBlockState(blockpos.up()).getBlock() instanceof BlockCactus)
+                    this.currentTask == Task.HARVEST_REEDS ? world.getBlockState(blockpos.above()).getBlock() instanceof SugarCaneBlock
+                    : world.getBlockState(blockpos.above()).getBlock() instanceof CactusBlock)
             {
                 for (int i = 3; i > 0; i--)
                 {
-                    BlockPos iblockpos = blockpos.up(i);
-                    if (!(world.getBlockState(iblockpos).getBlock() instanceof BlockReed || world.getBlockState(iblockpos).getBlock() instanceof BlockCactus))
+                    BlockPos iblockpos = blockpos.above(i);
+                    if (!(world.getBlockState(iblockpos).getBlock() instanceof SugarCaneBlock || world.getBlockState(iblockpos).getBlock() instanceof CactusBlock))
                         continue;
 
-                    List<ItemStack> drops = world.getBlockState(iblockpos).getBlock().getDrops(world, iblockpos, world.getBlockState(iblockpos), 0);
+                    List<ItemStack> drops = iblockstate.getBlock().getDrops(iblockstate, (ServerLevel) world, blockpos, null);
                     for (ItemStack drop : drops)
                         this.hayGolem.getInventory().addItem(drop);
 
                     world.destroyBlock(iblockpos, false);
                 }
             }
-            else if (this.currentTask == Task.DEPOSIT_CHEST && block instanceof BlockChest)
+            else if (this.currentTask == Task.DEPOSIT_CHEST && block instanceof ChestBlock)
             {
-                TileEntityChest chest = (TileEntityChest) world.getTileEntity(blockpos);
-                IItemHandler itemhandler = chest.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.NORTH);
+                ChestBlockEntity chest = (ChestBlockEntity) world.getBlockEntity(blockpos);
+                IItemHandler itemhandler = chest.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.NORTH).resolve().get();
 
                 boolean flagCactusReeds = false;
 
-                for (int i = 0; i < this.hayGolem.getInventory().getSizeInventory(); i++)
+                for (int i = 0; i < this.hayGolem.getInventory().getContainerSize(); i++)
                 {
-                    ItemStack itemStack = this.hayGolem.getInventory().getStackInSlot(i);
+                    ItemStack itemStack = this.hayGolem.getInventory().getItem(i);
                     if (itemStack.isEmpty())
                         continue;
 
@@ -268,8 +271,8 @@ public class HayGolemHarvestAI extends EntityAIBase
                             || itemStack.getItem() == Items.POTATO
                             || itemStack.getItem() == Items.CARROT
                             || itemStack.getItem() == Items.BEETROOT_SEEDS
-                            || itemStack.getItem() == Items.REEDS
-                            || itemStack.getItem() == Item.getItemFromBlock(Blocks.CACTUS)))
+                            || itemStack.getItem() == Items.SUGAR_CANE
+                            || itemStack.getItem() == Item.byBlock(Blocks.CACTUS)))
                     {
                         for (int n = 0; n < itemhandler.getSlots(); n++)
                         {
@@ -281,7 +284,7 @@ public class HayGolemHarvestAI extends EntityAIBase
                             }
                         }
                     }
-                    else if (itemStack.getItem() == Items.REEDS || itemStack.getItem() == Item.getItemFromBlock(Blocks.CACTUS) && !flagCactusReeds)
+                    else if (itemStack.getItem() == Items.SUGAR_CANE || itemStack.getItem() == Item.byBlock(Blocks.CACTUS) && !flagCactusReeds)
                     {
                         for (int n = 0; n < itemhandler.getSlots(); n++)
                         {
@@ -296,7 +299,7 @@ public class HayGolemHarvestAI extends EntityAIBase
                     }
 
                     if (flagMoved)
-                        this.hayGolem.getInventory().removeStackFromSlot(i);
+                        this.hayGolem.getInventory().setItem(i, ItemStack.EMPTY);
                 }
             }
 
@@ -314,7 +317,7 @@ public class HayGolemHarvestAI extends EntityAIBase
     {
         BlockPos startingPos = this.hayGolem.farm.getStartingPos();
         Vec3i farmSize = this.hayGolem.farm.getSize();
-        BlockPos endingPos = startingPos.add(this.hayGolem.farm.getSize());
+        BlockPos endingPos = startingPos.offset(this.hayGolem.farm.getSize());
 
         for (int x = startingPos.getX(); farmSize.getX() < 0 ? x >= endingPos.getX() : x <= endingPos.getX(); x += farmSize.getX() < 0 ? -1 : 1)
         {
@@ -324,7 +327,7 @@ public class HayGolemHarvestAI extends EntityAIBase
                 {
                     BlockPos pos = new BlockPos(x, y, z);
 
-                    if (this.shouldMoveTo(this.hayGolem.world, pos))
+                    if (this.shouldMoveTo(this.hayGolem.level, pos))
                     {
                         this.destinationBlock = pos;
                         this.hayGolem.farm.focusedBlocks.add(this.destinationBlock);
@@ -337,27 +340,27 @@ public class HayGolemHarvestAI extends EntityAIBase
         return false;
     }
 
-    private boolean shouldMoveTo(World worldIn, BlockPos pos)
+    private boolean shouldMoveTo(Level worldIn, BlockPos pos)
     {
         if (this.hayGolem.farm.focusedBlocks.contains(pos))
             return false;
 
-        IBlockState blockState = worldIn.getBlockState(pos);
+        BlockState blockState = worldIn.getBlockState(pos);
         Block block = blockState.getBlock();
 
-        IBlockState topBlockState = worldIn.getBlockState(pos.up());
+        BlockState topBlockState = worldIn.getBlockState(pos.above());
         Block topBlock = topBlockState.getBlock();
 
 
         boolean moveToFlag = false;
-        if (block instanceof BlockFarmland)
+        if (block instanceof FarmBlock)
         {
-            if (topBlock instanceof BlockCrops && ((BlockCrops)topBlock).isMaxAge(topBlockState) && (this.currentTask == Task.IDLING || this.currentTask == Task.HARVEST_CROPS))
+            if (topBlock instanceof CropBlock && ((CropBlock)topBlock).isMaxAge(topBlockState) && (this.currentTask == Task.IDLING || this.currentTask == Task.HARVEST_CROPS))
             {
                 this.currentTask = Task.HARVEST_CROPS;
                 moveToFlag = true;
             }
-            else if (topBlock instanceof BlockCrops && this.hayGolem.hasItem(Items.DYE)  && this.hayGolem.getItem(Items.DYE).getMetadata() == 15 && (this.currentTask == Task.IDLING || this.currentTask == Task.USE_BONEMEAL))
+            else if (topBlock instanceof CropBlock && this.hayGolem.hasItem(Items.BONE_MEAL) && (this.currentTask == Task.IDLING || this.currentTask == Task.USE_BONEMEAL))
             {
                 this.currentTask = Task.USE_BONEMEAL;
                 moveToFlag = true;
@@ -368,45 +371,45 @@ public class HayGolemHarvestAI extends EntityAIBase
                 moveToFlag = true;
             }
         }
-        else if ((topBlock instanceof BlockMelon || topBlock instanceof BlockPumpkin) && (this.currentTask == Task.IDLING || this.currentTask == Task.HARVEST_SPECIFIC_BLOCKS))
+        else if ((topBlock instanceof MelonBlock || topBlock instanceof PumpkinBlock) && (this.currentTask == Task.IDLING || this.currentTask == Task.HARVEST_SPECIFIC_BLOCKS))
         {
             this.currentTask = Task.HARVEST_SPECIFIC_BLOCKS;
             moveToFlag = true;
         }
-        else if (topBlock instanceof BlockChest && this.hayGolem.isInventoryFull() && (this.currentTask == Task.IDLING || this.currentTask == Task.DEPOSIT_CHEST))
+        else if (topBlock instanceof ChestBlock && worldIn.getBlockEntity(pos.above()) instanceof ChestBlockEntity && this.hayGolem.isInventoryFull() && (this.currentTask == Task.IDLING || this.currentTask == Task.DEPOSIT_CHEST))
         {
             this.currentTask = Task.DEPOSIT_CHEST;
             moveToFlag = true;
         }
-        else if (block instanceof BlockGrass &&
+        else if (block instanceof GrassBlock &&
                 (worldIn.getBlockState(pos.north()).getMaterial() == Material.WATER ||
                         worldIn.getBlockState(pos.south()).getMaterial() == Material.WATER ||
                         worldIn.getBlockState(pos.west()).getMaterial() == Material.WATER ||
                         worldIn.getBlockState(pos.east()).getMaterial() == Material.WATER))
         {
-            if (topBlock instanceof BlockReed && worldIn.getBlockState(pos.up().up()).getBlock() instanceof BlockReed && (this.currentTask == Task.IDLING || this.currentTask == Task.HARVEST_REEDS))
+            if (topBlock instanceof SugarCaneBlock && worldIn.getBlockState(pos.above().above()).getBlock() instanceof SugarCaneBlock && (this.currentTask == Task.IDLING || this.currentTask == Task.HARVEST_REEDS))
             {
                 this.currentTask = Task.HARVEST_REEDS;
                 moveToFlag = true;
             }
-            if (topBlockState.getMaterial() == Material.AIR && this.hayGolem.hasItem(Items.REEDS) && (this.currentTask == Task.IDLING || this.currentTask == Task.PLANT_REEDS))
+            if (topBlockState.getMaterial() == Material.AIR && this.hayGolem.hasItem(Items.SUGAR_CANE) && (this.currentTask == Task.IDLING || this.currentTask == Task.PLANT_REEDS))
             {
                 this.currentTask = Task.PLANT_REEDS;
                 moveToFlag = true;
             }
         }
-        else if (block instanceof BlockSand &&
-                !(worldIn.getBlockState(pos.up().north()).getMaterial().blocksMovement() ||
-                        worldIn.getBlockState(pos.up().south()).getMaterial().blocksMovement() ||
-                        worldIn.getBlockState(pos.up().west()).getMaterial().blocksMovement() ||
-                        worldIn.getBlockState(pos.up().east()).getMaterial().blocksMovement()))
+        else if (block instanceof SandBlock &&
+                !(worldIn.getBlockState(pos.above().north()).getMaterial().blocksMotion() ||
+                        worldIn.getBlockState(pos.above().south()).getMaterial().blocksMotion() ||
+                        worldIn.getBlockState(pos.above().west()).getMaterial().blocksMotion() ||
+                        worldIn.getBlockState(pos.above().east()).getMaterial().blocksMotion()))
         {
-            if (topBlock instanceof BlockCactus && worldIn.getBlockState(pos.up().up()).getBlock() instanceof BlockCactus && (this.currentTask == Task.IDLING || this.currentTask == Task.HARVEST_CACTUS))
+            if (topBlock instanceof CactusBlock && worldIn.getBlockState(pos.above().above()).getBlock() instanceof CactusBlock && (this.currentTask == Task.IDLING || this.currentTask == Task.HARVEST_CACTUS))
             {
                 this.currentTask = Task.HARVEST_CACTUS;
                 moveToFlag = true;
             }
-            if (topBlockState.getMaterial() == Material.AIR && this.hayGolem.hasItem(Item.getItemFromBlock(Blocks.CACTUS)) && (this.currentTask == Task.IDLING || this.currentTask == Task.PLANT_CACTUS))
+            if (topBlockState.getMaterial() == Material.AIR && this.hayGolem.hasItem(Item.byBlock(Blocks.CACTUS)) && (this.currentTask == Task.IDLING || this.currentTask == Task.PLANT_CACTUS))
             {
                 this.currentTask = Task.PLANT_CACTUS;
                 moveToFlag = true;

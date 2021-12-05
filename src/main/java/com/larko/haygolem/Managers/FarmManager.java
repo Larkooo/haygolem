@@ -4,21 +4,16 @@ import com.larko.haygolem.Block.FarmMarkerBlock;
 import com.larko.haygolem.Serializers.FarmSerializer;
 import com.larko.haygolem.Util.Metadata;
 import com.larko.haygolem.World.Farm;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockHay;
-import net.minecraft.block.BlockTorch;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.TorchBlock;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.*;
 
@@ -37,12 +32,12 @@ public class FarmManager {
 
     public static ArrayList<Farm> farms = new ArrayList<>();
 
-    public static final Class<? extends Block> boundaryBlock = FarmMarkerBlock.class;
+    public static final Class<? extends Block> boundaryBlock = TorchBlock.class;
 
     // create a farm
     @SubscribeEvent
     public static void onPlaceEvent(BlockEvent.EntityPlaceEvent event) {
-        if (!(event.getEntity() instanceof EntityPlayerMP))
+        if (event.getWorld().isClientSide() || !(event.getEntity() instanceof ServerPlayer))
             return;
 
         Block placedBlock = event.getPlacedBlock().getBlock();
@@ -67,7 +62,22 @@ public class FarmManager {
             return;
 
         pointCounter = 0;
-        farms.add(new Farm(event.getEntity().getUniqueID(), startingPoint, new Vec3i(sizeX, sizeY, sizeZ), event.getBlockSnapshot().getDimId()));
+
+        int dimensionId = 1;
+        ResourceLocation dimensionLoc = event.getBlockSnapshot().getLevel().dimensionType().effectsLocation();
+
+        if (dimensionLoc == DimensionType.NETHER_EFFECTS)
+            dimensionId = 2;
+        else if (dimensionLoc == DimensionType.END_EFFECTS)
+            dimensionId = 3;
+
+        farms.add(new Farm(
+                event.getEntity().getUUID(),
+                startingPoint,
+                new Vec3i(sizeX, sizeY, sizeZ),
+                dimensionId
+                ));
+        FarmSerializer.get(event.getWorld().getServer()).setDirty();
     }
 
     // delete destroyed farm boundaries
@@ -83,48 +93,5 @@ public class FarmManager {
         }
 
         return null;
-    }
-
-    public static void serialize()
-    {
-        FarmSerializer store = FarmSerializer.get();
-
-        // remove all data
-        if(store != null && store.data != null && store.data.getSize() > 0) {
-            Set<String> toRemove = new HashSet<String>();
-            for(String key : store.data.getKeySet()) { // Remove all data
-                if(!key.equals("")) {
-                    toRemove.add(key);
-                }
-            }
-            for(String key : toRemove) {
-                store.data.removeTag(key);
-            }
-        }
-
-        // patch new data
-        for (Farm farm : farms)
-        {
-            NBTTagCompound data = farm.serialize();
-
-            store.data.setTag("FARM_" + farm.getUuid().toString(), data);
-            store.markDirty();
-        }
-    }
-
-    public static void deserialize()
-    {
-        farms.clear();
-
-        FarmSerializer store = FarmSerializer.get();
-        if (store.data != null)
-        {
-            for (String key : store.data.getKeySet())
-            {
-                Farm farm = Farm.deserialize(store.data.getCompoundTag(key));
-
-                farms.add(farm);
-            }
-        }
     }
 }

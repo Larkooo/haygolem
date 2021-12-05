@@ -1,5 +1,29 @@
 package com.larko.haygolem;
 
+import com.larko.haygolem.Events.FarmEventListener;
+import com.larko.haygolem.Events.HayGolemEventListener;
+import com.larko.haygolem.Handlers.RegistryHandler;
+import com.larko.haygolem.Managers.GolemManager;
+import com.larko.haygolem.Proxy.ClientProxy;
+import com.larko.haygolem.Proxy.ServerProxy;
+import com.larko.haygolem.Serializers.FarmSerializer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LevelEvent;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
+import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.larko.haygolem.Handlers.PacketHandler;
@@ -8,46 +32,54 @@ import com.larko.haygolem.Proxy.CommonProxy;
 import com.larko.haygolem.Util.Metadata;
 
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
-@Mod(modid = Metadata.MODID, name = Metadata.NAME, version = Metadata.VERSION)
+@Mod(Metadata.MODID)
 public class Main
 {
-    @Mod.Instance
-    public static Main instance;
+    private static final Logger LOGGER = LogManager.getLogger();
 
-    private static Logger logger;
+    public static CommonProxy proxy = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> ServerProxy::new);
 
-    @SidedProxy(clientSide = Metadata.CLIENT_PROXY, serverSide = Metadata.SERVER_PROXY)
-    public static CommonProxy commonProxy;
+    public Main() {
+        // Register the setup method for modloading
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
 
-    @EventHandler
-    public void preInit(FMLPreInitializationEvent event)
+        FMLJavaModLoadingContext.get().getModEventBus().register(RegistryHandler.class);
+        MinecraftForge.EVENT_BUS.register(FarmManager.class);
+        MinecraftForge.EVENT_BUS.register(GolemManager.class);
+        MinecraftForge.EVENT_BUS.register(FarmEventListener.class);
+        MinecraftForge.EVENT_BUS.register(HayGolemEventListener.class);
+
+        // Register ourselves for server and other game events we are interested in
+        MinecraftForge.EVENT_BUS.register(this);
+
+        // register entities, items and blocks
+        RegistryHandler.ENTITY_TYPES.register(FMLJavaModLoadingContext.get().getModEventBus());
+        RegistryHandler.BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        RegistryHandler.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
+    }
+
+    private void setup(final FMLCommonSetupEvent event)
     {
-    	PacketHandler.registerMessages("farmgui");
-        logger = event.getModLog();
+        // some preinit code
+        PacketHandler.registerMessages("farmgui");
     }
 
-    @EventHandler
-    public void init(FMLInitializationEvent event)
-    {
-        // some example code
-        //NetworkRegistry.INSTANCE.registerGuiHandler(Metadata.MODID, );
-        logger.info("initialized");
+    @SubscribeEvent
+    public void onWorldLoad(WorldEvent.Load event) {
+        Level world = (Level) event.getWorld();
+        if (world instanceof ServerLevel
+                && world.dimension().equals(Level.OVERWORLD))
+        {
+            FarmManager.farms.clear();
+            FarmSerializer.get(world.getServer());
+            LOGGER.info("farms deserialized");
+        }
     }
 
-    @EventHandler
-    public void serverLoad(FMLServerStartingEvent event) {
-        FarmManager.deserialize();
-    }
-
-    @EventHandler
-    public void serverStop(FMLServerStoppingEvent event) {
-        FarmManager.serialize();
-    }
+//    @SubscribeEvent
+//    public void onServerStop(ServerStoppingEvent event) {
+//        //FarmSerializer.get(event.getServer().overworld());
+//        LOGGER.info("farms serialized");
+//    }
 }
