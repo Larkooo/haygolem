@@ -7,6 +7,8 @@ import com.larko.haygolem.Managers.GolemManager;
 import com.larko.haygolem.Proxy.ClientProxy;
 import com.larko.haygolem.Proxy.ServerProxy;
 import com.larko.haygolem.Serializers.FarmSerializer;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
@@ -55,6 +57,7 @@ public class Main
     {
         // some preinit code
         PacketHandler.registerMessages("farmgui");
+        ItemBlockRenderTypes.setRenderLayer(RegistryHandler.farmMarkerBlock, RenderType.cutout());
     }
 
     @SubscribeEvent
