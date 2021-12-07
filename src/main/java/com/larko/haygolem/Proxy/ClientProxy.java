@@ -8,17 +8,19 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 public class ClientProxy extends CommonProxy {
+	public ClientProxy() {}
+
 	@Override
 	public void showFarmGui(Farm farm, Level world, Player player)
 	{
-		if (world.isClientSide)
+		if (world.isClientSide())
 			displayFarmGui(farm);
 	}
 	
 	@Override
 	public void displayFarmGui(Farm farm)
 	{
-		Minecraft.getInstance().pushGuiLayer(new FarmGui(farm));
+		Minecraft.getInstance().setScreen(new FarmGui(farm));
 		//Minecraft.getInstance().gui..displayGuiScreen(new FarmGui(farm));
 	}
 }

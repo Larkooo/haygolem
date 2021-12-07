@@ -1,6 +1,9 @@
 package com.larko.haygolem.Graphics.Models;
 
 import com.larko.haygolem.Entity.HayGolemEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
+import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.HierarchicalModel;
 
 import net.minecraft.client.model.geom.ModelPart;
@@ -8,12 +11,13 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class HayGolemModel<T extends HayGolemEntity> extends HierarchicalModel<T> {
+public class HayGolemModel<T extends HayGolemEntity> extends HierarchicalModel<T> implements ArmedModel {
     private final ModelPart root;
     private final ModelPart head;
     private final ModelPart rightArm;
@@ -56,24 +60,28 @@ public class HayGolemModel<T extends HayGolemEntity> extends HierarchicalModel<T
     }
 
     public void prepareMobModel(T p_102957_, float p_102958_, float p_102959_, float p_102960_) {
-        int i = 10;
-        if (i > 0) {
-            this.rightArm.xRot = -2.0F + 1.5F * Mth.triangleWave((float)i - p_102960_, 10.0F);
-            this.leftArm.xRot = -2.0F + 1.5F * Mth.triangleWave((float)i - p_102960_, 10.0F);
-        } else {
-            int j = 400;
-            if (j > 0) {
-                this.rightArm.xRot = -0.8F + 0.025F * Mth.triangleWave((float)j, 70.0F);
-                this.leftArm.xRot = 0.0F;
-            } else {
-                this.rightArm.xRot = (-0.2F + 1.5F * Mth.triangleWave(p_102958_, 13.0F)) * p_102959_;
-                this.leftArm.xRot = (-0.2F - 1.5F * Mth.triangleWave(p_102958_, 13.0F)) * p_102959_;
-            }
-        }
-
+        this.rightArm.xRot = (-0.2F + 1.5F * Mth.triangleWave(p_102958_, 13.0F)) * p_102959_;
+        this.leftArm.xRot = (-0.2F - 1.5F * Mth.triangleWave(p_102958_, 13.0F)) * p_102959_;
     }
 
     public ModelPart getFlowerHoldingArm() {
         return this.rightArm;
+    }
+
+    @Override
+    public void translateToHand(HumanoidArm p_102108_, PoseStack p_102109_) {
+        ModelPart modelpart = this.getFlowerHoldingArm();
+        p_102109_.translate((double)(modelpart.x / 16.0F), (double)(modelpart.y / 16.0F), (double)(modelpart.z / 16.0F));
+        if (modelpart.zRot != 0.0F) {
+            p_102109_.mulPose(Vector3f.ZP.rotation(modelpart.zRot));
+        }
+
+        if (modelpart.yRot != 0.0F) {
+            p_102109_.mulPose(Vector3f.YP.rotation(modelpart.yRot));
+        }
+
+        if (modelpart.xRot != 0.0F) {
+            p_102109_.mulPose(Vector3f.XP.rotation(modelpart.xRot));
+        }
     }
 }

@@ -4,6 +4,7 @@ import com.larko.haygolem.Main;
 import com.larko.haygolem.Managers.FarmManager;
 import com.larko.haygolem.Util.Metadata;
 import com.larko.haygolem.World.Farm;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
@@ -44,25 +45,6 @@ public class FarmEventListener {
             if (farm.isWithinBounds(event.getPos()))
             {
                 Main.proxy.showFarmGui(farm, event.getWorld(), event.getPlayer());
-                return;
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onBlockDestroy(BlockEvent.BreakEvent event)
-    {
-        // check if broke block is boundary block
-        if (!(event.getWorld().getBlockState(event.getPos()).getBlock().getClass() == FarmManager.boundaryBlock))
-            return;
-
-        // check if is within a farm
-        for (int i = 0; i < FarmManager.farms.size(); i++)
-        {
-            if (FarmManager.farms.get(i).isWithinBounds(event.getPos()))
-            {
-                // remove the farm
-                FarmManager.farms.remove(i);
                 return;
             }
         }

@@ -1,6 +1,7 @@
 package com.larko.haygolem.Graphics.Renderers;
 
 import com.larko.haygolem.Entity.HayGolemEntity;
+import com.larko.haygolem.Graphics.Layers.HayGolemHeldItemLayer;
 import com.larko.haygolem.Graphics.Models.HayGolemModel;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
@@ -10,6 +11,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.IronGolemCrackinessLayer;
 import net.minecraft.client.renderer.entity.layers.IronGolemFlowerLayer;
+import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraftforge.api.distmarker.Dist;
@@ -23,6 +25,8 @@ public class HayGolemRenderer extends MobRenderer<HayGolemEntity, HayGolemModel<
 
     public HayGolemRenderer(EntityRendererProvider.Context p_174188_) {
         super(p_174188_, new HayGolemModel<>(p_174188_.bakeLayer(ModelLayers.IRON_GOLEM)), 0.7F);
+        super.addLayer(new HayGolemHeldItemLayer(this));
+
 //        this.addLayer(new IronGolemCrackinessLayer(this));
 //        this.addLayer(new IronGolemFlowerLayer(this));
     }

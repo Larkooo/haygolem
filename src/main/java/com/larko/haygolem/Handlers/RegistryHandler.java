@@ -9,17 +9,18 @@ import net.minecraft.client.renderer.entity.IronGolemRenderer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
 
+import net.minecraft.data.recipes.RecipeBuilder;
+import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
@@ -30,6 +31,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
+import net.minecraftforge.common.crafting.IShapedRecipe;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -50,9 +52,8 @@ public class RegistryHandler {
     // gets incremented every time an entity is registered
     public static int entityId = 0;
 
-    public static FarmMarkerBlock farmMarkerBlock = (FarmMarkerBlock) new FarmMarkerBlock(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().instabreak().lightLevel((p_50886_) -> {
-        return 14;
-    }).sound(SoundType.CROP), ParticleTypes.SMOKE);
+    public static FarmMarkerBlock farmMarkerBlock = (FarmMarkerBlock) new FarmMarkerBlock(
+            BlockBehaviour.Properties.of(Material.DECORATION).noCollission().instabreak().lightLevel((p_50886_) -> 14).sound(SoundType.CROP), ParticleTypes.FLAME);
 
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, Metadata.MODID);
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITIES,
@@ -60,11 +61,10 @@ public class RegistryHandler {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS,
             Metadata.MODID);
 
-
     public static final RegistryObject<EntityType<HayGolemEntity>> HAY_GOLEM = ENTITY_TYPES.register("hay_golem",
             () -> EntityType.Builder.of(HayGolemEntity::new, MobCategory.MISC).sized(1.4F, 2.7F).clientTrackingRange(10).immuneTo(Blocks.CACTUS).build("hay_golem"));
-    //public static final RegistryObject<Block> FARM_MARKER_BLOCK = BLOCKS.register("farm_marker", () -> farmMarkerBlock);
-    //public static final RegistryObject<Item> FARM_MARKER_ITEM = ITEMS.register("farm_marker", () -> Item.byBlock(farmMarkerBlock).setRegistryName("farm_marker"));
+    public static final RegistryObject<Block> FARM_MARKER_BLOCK = BLOCKS.register("farm_marker", () -> farmMarkerBlock);
+    public static final RegistryObject<Item> FARM_MARKER_ITEM = ITEMS.register("farm_marker", () -> new BlockItem(FARM_MARKER_BLOCK.get(), new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)));
 
 //    @SubscribeEvent
 //    public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
@@ -87,14 +87,6 @@ public class RegistryHandler {
 //    @SubscribeEvent
 //    public static void registerItemBlocks(RegistryEvent.Register<Item> event) {
 //        event.getRegistry().register(new BlockItem(farmMarkerBlock, farmMarkerBloc).setRegistryName(farmMarkerBlock.getRegistryName()));
-//    }
-
-//    @SubscribeEvent
-//    public static void registerRecipes(RegistryEvent.Register<ShapelessRecipe> event) {
-////        NonNullList<Ingredient> lst = NonNullList.create();
-////        lst.add(Ingredient.of(Item.byBlock(Blocks.TORCH)));
-////        lst.add(Ingredient.of(Item.byBlock(Blocks.TORCH)));
-////        event.getRegistry().register(new ShapelessRecipe(new ResourceLocation(Metadata.MODID, "farm_marker"), "idk", new ItemStack(Item.byBlock(farmMarkerBlock)), lst));
 //    }
 
     // register attributes

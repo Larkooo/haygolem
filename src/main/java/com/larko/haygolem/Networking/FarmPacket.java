@@ -5,10 +5,8 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import com.larko.haygolem.Main;
-import com.larko.haygolem.Graphics.Screens.FarmGui;
 import com.larko.haygolem.World.Farm;
 
-import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;

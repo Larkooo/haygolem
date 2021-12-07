@@ -9,6 +9,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 ;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.ContainerListener;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -40,6 +43,12 @@ public class HayGolemEntity extends AbstractGolem {
             Items.IRON_HOE,
             Items.DIAMOND_HOE
     );
+    public static List<Item> PLANTABLE_ITEMS = Arrays.asList(
+            Items.WHEAT_SEEDS,
+            Items.POTATO,
+            Items.CARROT,
+            Items.BEETROOT_SEEDS
+    );
 
     @Nullable
     public Farm farm;
@@ -51,6 +60,7 @@ public class HayGolemEntity extends AbstractGolem {
         super(type, worldIn);
         //this.inventory = new Inventory("HayGolem", false, CAPACITY);
         this.inventory = new SimpleContainer(CAPACITY);
+        this.inventory.addListener(p_18983_ -> onInventoryChange());
 
 //        class listener extends ContainerListener
 //        {
@@ -197,28 +207,20 @@ public class HayGolemEntity extends AbstractGolem {
         {
             ItemStack itemstack = this.inventory.getItem(i);
 
-            if (!itemstack.isEmpty() &&
-                    (itemstack.getItem() == Items.WHEAT_SEEDS
-                            || itemstack.getItem() == Items.POTATO
-                            || itemstack.getItem() == Items.CARROT
-                            || itemstack.getItem() == Items.BEETROOT_SEEDS
-                    )
-            )
-            {
+            if (!itemstack.isEmpty() && PLANTABLE_ITEMS.contains(itemstack.getItem()))
                 return true;
-            }
         }
 
         return false;
     }
 
-    public void onInventoryChange(int slot)
+    public void onInventoryChange()
     {
         ItemStack tool = hasToolInInventory();
         if (tool == null)
             return;
 
-//        this.equipItemIfPossible(EnumHand.MAIN_HAND, tool);
+        this.setItemInHand(InteractionHand.MAIN_HAND, tool);
     }
 
     @Override

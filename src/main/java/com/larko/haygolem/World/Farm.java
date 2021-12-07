@@ -1,6 +1,5 @@
 package com.larko.haygolem.World;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
@@ -71,9 +70,9 @@ public class Farm {
         return this.uuid;
     }
 
-    public Player getPlayer()
+    public UUID getOwnerUuid()
     {
-        return Minecraft.getInstance().level.getPlayerByUUID(ownerUuid);
+        return ownerUuid;
     }
 
     public BlockPos getStartingPos()

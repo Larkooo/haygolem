@@ -73,6 +73,9 @@ public class HayGolemHarvestAI extends Goal
     @Override
     public boolean canContinueToUse()
     {
+        //if (this.currentTask == Task.IDLING && this.hayGolem.farm.focusedBlocks.contains(this.destinationBlock))
+        //    this.hayGolem.farm.focusedBlocks.remove(this.destinationBlock);
+
         return this.hayGolem.farm != null && this.currentTask != Task.IDLING && this.timeoutCounter >= -this.maxStayTicks && this.timeoutCounter <= 1200 && this.shouldMoveTo(this.hayGolem.level, this.destinationBlock);
     }
 
@@ -87,8 +90,6 @@ public class HayGolemHarvestAI extends Goal
     @Override
     public void tick()
     {
-        this.hayGolem.farm.focusedBlocks.remove(this.destinationBlock);
-
         if (Math.sqrt(this.hayGolem.distanceToSqr(new Vec3(this.destinationBlock.above().getX(), this.destinationBlock.above().getY(), this.destinationBlock.above().getZ()))) > 3.0 || (this.currentTask == Task.HARVEST_CACTUS && Math.sqrt(this.hayGolem.distanceToSqr(new Vec3(this.destinationBlock.above().getX(), this.destinationBlock.above().getY(), this.destinationBlock.above().getZ()))) > 6.0))
         {
             this.closeToDestination = false;
@@ -108,6 +109,7 @@ public class HayGolemHarvestAI extends Goal
 
         if (this.closeToDestination)
         {
+            this.hayGolem.farm.focusedBlocks.remove(this.destinationBlock);
             this.hayGolem.getLookControl().setLookAt((double)this.destinationBlock.getX() + 0.5D, (double)(this.destinationBlock.getY() + 1), (double)this.destinationBlock.getZ() + 0.5D, 10.0F, (float)this.hayGolem.getMaxHeadXRot());
 
             Level world = this.hayGolem.level;
@@ -327,7 +329,7 @@ public class HayGolemHarvestAI extends Goal
                 {
                     BlockPos pos = new BlockPos(x, y, z);
 
-                    if (this.shouldMoveTo(this.hayGolem.level, pos))
+                    if (this.shouldMoveTo(this.hayGolem.level, pos) && !this.hayGolem.farm.focusedBlocks.contains(pos))
                     {
                         this.destinationBlock = pos;
                         this.hayGolem.farm.focusedBlocks.add(this.destinationBlock);
@@ -342,9 +344,6 @@ public class HayGolemHarvestAI extends Goal
 
     private boolean shouldMoveTo(Level worldIn, BlockPos pos)
     {
-        if (this.hayGolem.farm.focusedBlocks.contains(pos))
-            return false;
-
         BlockState blockState = worldIn.getBlockState(pos);
         Block block = blockState.getBlock();
 
@@ -378,8 +377,22 @@ public class HayGolemHarvestAI extends Goal
         }
         else if (topBlock instanceof ChestBlock && worldIn.getBlockEntity(pos.above()) instanceof ChestBlockEntity && this.hayGolem.isInventoryFull() && (this.currentTask == Task.IDLING || this.currentTask == Task.DEPOSIT_CHEST))
         {
-            this.currentTask = Task.DEPOSIT_CHEST;
-            moveToFlag = true;
+            ChestBlockEntity chestEntity = (ChestBlockEntity) worldIn.getBlockEntity(pos.above());
+
+            // check if chest is full
+            boolean full = true;
+            for (int i = 0; i < chestEntity.getContainerSize(); i++)
+            {
+                if (chestEntity.getItem(i).isEmpty())
+                    full = false;
+            }
+
+            // if the chest is not full, then the golem can go deposit to it
+            if (!full)
+            {
+                this.currentTask = Task.DEPOSIT_CHEST;
+                moveToFlag = true;
+            }
         }
         else if (block instanceof GrassBlock &&
                 (worldIn.getBlockState(pos.north()).getMaterial() == Material.WATER ||

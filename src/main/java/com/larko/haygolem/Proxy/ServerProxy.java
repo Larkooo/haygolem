@@ -11,6 +11,8 @@ import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.PacketDistributor;
 
 public class ServerProxy extends CommonProxy {
+	public ServerProxy() {}
+
 	@Override
 	public void showFarmGui(Farm farm, Level world, Player player)
 	{

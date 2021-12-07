@@ -1,80 +1,54 @@
-//package com.larko.haygolem.Graphics.Layers;
-//
-//import com.larko.haygolem.Graphics.Models.HayGolemModel;
-//import com.larko.haygolem.Graphics.Renderers.HayGolemRenderer;
-//import net.minecraft.client.Minecraft;
-//import net.minecraft.client.model.ModelBiped;
-//import net.minecraft.client.renderer.GlStateManager;
-//import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-//import net.minecraft.client.renderer.entity.RenderLivingBase;
-//import net.minecraft.client.renderer.entity.layers.LayerRenderer;
-//import net.minecraft.entity.EntityLivingBase;
-//import net.minecraft.item.ItemStack;
-//import net.minecraft.util.EnumHandSide;
-//import net.minecraftforge.fml.relauncher.Side;
-//import net.minecraftforge.fml.relauncher.SideOnly;
-//
-//@SideOnly(Side.CLIENT)
-//public class HayGolemHeldItemLayer implements LayerRenderer<EntityLivingBase>
-//{
-//    protected final HayGolemRenderer hayGolemRenderer;
-//
-//    public HayGolemHeldItemLayer(HayGolemRenderer hayGolemRenderer)
-//    {
-//        this.hayGolemRenderer = hayGolemRenderer;
-//    }
-//
-//    public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale)
-//    {
-//        boolean flag = entitylivingbaseIn.getPrimaryHand() == EnumHandSide.RIGHT;
-//        ItemStack itemstack = flag ? entitylivingbaseIn.getHeldItemOffhand() : entitylivingbaseIn.getHeldItemMainhand();
-//        ItemStack itemstack1 = flag ? entitylivingbaseIn.getHeldItemMainhand() : entitylivingbaseIn.getHeldItemOffhand();
-//
-//        if (!itemstack.isEmpty() || !itemstack1.isEmpty())
-//        {
-//            GlStateManager.pushMatrix();
-//
-//            if (this.hayGolemRenderer.getMainModel().isChild)
-//            {
-//                float f = 0.5F;
-//                GlStateManager.translate(0.0F, 0.75F, 0.0F);
-//                GlStateManager.scale(0.5F, 0.5F, 0.5F);
-//            }
-//
-//            this.renderHeldItem(entitylivingbaseIn, itemstack1, ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, EnumHandSide.RIGHT);
-//            this.renderHeldItem(entitylivingbaseIn, itemstack, ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND, EnumHandSide.LEFT);
-//            GlStateManager.popMatrix();
-//        }
-//    }
-//
-//    private void renderHeldItem(EntityLivingBase p_188358_1_, ItemStack p_188358_2_, ItemCameraTransforms.TransformType p_188358_3_, EnumHandSide handSide)
-//    {
-//        if (!p_188358_2_.isEmpty())
-//        {
-//            GlStateManager.pushMatrix();
-//
-//            if (p_188358_1_.isSneaking())
-//            {
-//                GlStateManager.translate(0.0F, 0.2F, 0.0F);
-//            }
-//            // Forge: moved this call down, fixes incorrect offset while sneaking.
-//            this.translateToHand(handSide);
-//            GlStateManager.rotate(-90.0F, 1.0F, 0.0F, 0.0F);
-//            GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
-//            boolean flag = handSide == EnumHandSide.LEFT;
-//            GlStateManager.translate((float)(flag ? -1 : 1) * 0.700f, 0.300F, -1.5f);
-//            Minecraft.getMinecraft().getItemRenderer().renderItemSide(p_188358_1_, p_188358_2_, p_188358_3_, flag);
-//            GlStateManager.popMatrix();
-//        }
-//    }
-//
-//    protected void translateToHand(EnumHandSide p_191361_1_)
-//    {
-//        ((HayGolemModel)this.hayGolemRenderer.getMainModel()).postRenderArm(0.0625F, p_191361_1_);
-//    }
-//
-//    public boolean shouldCombineTextures()
-//    {
-//        return false;
-//    }
-//}
+package com.larko.haygolem.Graphics.Layers;
+
+import com.larko.haygolem.Entity.HayGolemEntity;
+import com.larko.haygolem.Graphics.Models.HayGolemModel;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
+@OnlyIn(Dist.CLIENT)
+public class HayGolemHeldItemLayer extends RenderLayer<HayGolemEntity, HayGolemModel<HayGolemEntity>> {
+    public HayGolemHeldItemLayer(RenderLayerParent<HayGolemEntity, HayGolemModel<HayGolemEntity>> p_117183_) {
+        super(p_117183_);
+    }
+
+    public void render(PoseStack p_117204_, MultiBufferSource p_117205_, int p_117206_, HayGolemEntity p_117207_, float p_117208_, float p_117209_, float p_117210_, float p_117211_, float p_117212_, float p_117213_) {
+        boolean flag = p_117207_.getMainArm() == HumanoidArm.RIGHT;
+        ItemStack itemstack = flag ? p_117207_.getOffhandItem() : p_117207_.getMainHandItem();
+        ItemStack itemstack1 = flag ? p_117207_.getMainHandItem() : p_117207_.getOffhandItem();
+        if (!itemstack.isEmpty() || !itemstack1.isEmpty()) {
+            p_117204_.pushPose();
+            if (this.getParentModel().young) {
+                float f = 0.5F;
+                p_117204_.translate(0.0D, 0.75D, 0.0D);
+                p_117204_.scale(0.5F, 0.5F, 0.5F);
+            }
+
+            this.renderArmWithItem(p_117207_, itemstack1, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, HumanoidArm.RIGHT, p_117204_, p_117205_, p_117206_);
+            this.renderArmWithItem(p_117207_, itemstack, ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND, HumanoidArm.LEFT, p_117204_, p_117205_, p_117206_);
+            p_117204_.popPose();
+        }
+    }
+
+    protected void renderArmWithItem(LivingEntity p_117185_, ItemStack p_117186_, ItemTransforms.TransformType p_117187_, HumanoidArm p_117188_, PoseStack p_117189_, MultiBufferSource p_117190_, int p_117191_) {
+        if (!p_117186_.isEmpty()) {
+            p_117189_.pushPose();
+            this.getParentModel().translateToHand(p_117188_, p_117189_);
+            p_117189_.mulPose(Vector3f.XP.rotationDegrees(-90.0F));
+            p_117189_.mulPose(Vector3f.YP.rotationDegrees(180.0F));
+            boolean flag = p_117188_ == HumanoidArm.LEFT;
+            p_117189_.translate((double)((float)(flag ? -1 : 1) * 0.700F), 0.300D, -1.5F);
+            Minecraft.getInstance().getItemInHandRenderer().renderItem(p_117185_, p_117186_, p_117187_, flag, p_117189_, p_117190_, p_117191_);
+            p_117189_.popPose();
+        }
+    }
+}

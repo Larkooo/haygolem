@@ -32,12 +32,12 @@ public class FarmManager {
 
     public static ArrayList<Farm> farms = new ArrayList<>();
 
-    public static final Class<? extends Block> boundaryBlock = TorchBlock.class;
+    public static final Class<? extends Block> boundaryBlock = FarmMarkerBlock.class;
 
     // create a farm
     @SubscribeEvent
     public static void onPlaceEvent(BlockEvent.EntityPlaceEvent event) {
-        if (event.getWorld().isClientSide() || !(event.getEntity() instanceof ServerPlayer))
+        if (!(event.getEntity() instanceof ServerPlayer))
             return;
 
         Block placedBlock = event.getPlacedBlock().getBlock();
@@ -78,11 +78,34 @@ public class FarmManager {
                 dimensionId
                 ));
         FarmSerializer.get(event.getWorld().getServer()).setDirty();
+
+
     }
 
     // delete destroyed farm boundaries
-//    @SubscribeEvent
-//    public static void onBlockDestroy()
+    @SubscribeEvent
+    public static void onBlockDestroy(BlockEvent.BreakEvent event)
+    {
+        if (event.getWorld().isClientSide())
+            return;
+
+        // check if broke block is boundary block
+        if (!(event.getWorld().getBlockState(event.getPos()).getBlock().getClass() == FarmManager.boundaryBlock))
+            return;
+
+        // check if is within a farm
+        for (int i = 0; i < farms.size(); i++)
+        {
+            if (farms.get(i).isWithinBounds(event.getPos()))
+            {
+                // remove the farm
+                farms.remove(i);
+                return;
+            }
+        }
+
+        FarmSerializer.get(event.getWorld().getServer()).setDirty();
+    }
 
     public static Farm findByUuid(UUID uuid)
     {
