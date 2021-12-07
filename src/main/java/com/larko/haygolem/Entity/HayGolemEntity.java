@@ -50,6 +50,17 @@ public class HayGolemEntity extends AbstractGolem {
             Items.BEETROOT_SEEDS
     );
 
+    // API
+    public static void addPlantableItem(Item item)
+    {
+        PLANTABLE_ITEMS.add(item);
+    }
+    public static void removePlantableItem(Item item)
+    {
+        PLANTABLE_ITEMS.remove(item);
+    }
+
+
     @Nullable
     public Farm farm;
 
@@ -170,22 +181,6 @@ public class HayGolemEntity extends AbstractGolem {
         return bestTool;
     }
 
-    @Nullable
-    public ItemStack getItem(Item item)
-    {
-        for (int i = 0; i < this.inventory.getContainerSize(); i++)
-        {
-            ItemStack itemStack = this.inventory.getItem(i);
-
-            if (!itemStack.isEmpty() && itemStack.getItem() == item)
-            {
-                return itemStack;
-            }
-        }
-
-        return null;
-    }
-
     public boolean hasItem(Item item)
     {
         for (int i = 0; i < this.inventory.getContainerSize(); i++)
@@ -233,14 +228,22 @@ public class HayGolemEntity extends AbstractGolem {
             if (itemStack.isEmpty())
                 continue;
 
-            this.spawnAtLocation(itemStack.getItem(), itemStack.getCount());
+            this.spawnAtLocation(itemStack);
         }
 
         if (this.farm != null)
             this.farm.workersCount--;
     }
 
-//    @Override
+    @Override
+    public boolean hurt(DamageSource p_21016_, float p_21017_) {
+        if (p_21016_ == DamageSource.CACTUS && this.hasItem(Items.SLIME_BALL))
+            return false;
+
+        return super.hurt(p_21016_, p_21017_);
+    }
+
+    //    @Override
 //    public void onDeath(DamageSource cause) {
 //        super.onDeath(cause);
 //

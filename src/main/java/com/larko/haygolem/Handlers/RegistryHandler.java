@@ -62,7 +62,7 @@ public class RegistryHandler {
             Metadata.MODID);
 
     public static final RegistryObject<EntityType<HayGolemEntity>> HAY_GOLEM = ENTITY_TYPES.register("hay_golem",
-            () -> EntityType.Builder.of(HayGolemEntity::new, MobCategory.MISC).sized(1.4F, 2.7F).clientTrackingRange(10).immuneTo(Blocks.CACTUS).build("hay_golem"));
+            () -> EntityType.Builder.of(HayGolemEntity::new, MobCategory.MISC).sized(1.4F, 2.7F).clientTrackingRange(10).build("hay_golem"));
     public static final RegistryObject<Block> FARM_MARKER_BLOCK = BLOCKS.register("farm_marker", () -> farmMarkerBlock);
     public static final RegistryObject<Item> FARM_MARKER_ITEM = ITEMS.register("farm_marker", () -> new BlockItem(FARM_MARKER_BLOCK.get(), new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)));
 
