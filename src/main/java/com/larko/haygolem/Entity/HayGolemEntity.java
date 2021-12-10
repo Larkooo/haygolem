@@ -102,7 +102,7 @@ public class HayGolemEntity extends AbstractGolem {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new HayGolemSearchFarmAI(this, 1.0f, 100));
         this.goalSelector.addGoal(2, new HayGolemHarvestAI(this,  1.0f));
-        this.goalSelector.addGoal(3, new TemptGoal(this, 1.0f, Ingredient.of(Item.byBlock(Blocks.HAY_BLOCK)), false));
+        this.goalSelector.addGoal(3, new TemptGoal(this, 1.0f, Ingredient.of(Items.HAY_BLOCK), false));
         //this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0D));
         // broken
         // this.tasks.addTask(2, new HayGolemWanderAI(this, 0.4f));

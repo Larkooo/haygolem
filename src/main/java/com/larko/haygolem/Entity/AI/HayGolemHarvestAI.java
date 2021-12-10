@@ -218,7 +218,7 @@ public class HayGolemHarvestAI extends Goal
                             world.setBlock(blockpos, Blocks.SUGAR_CANE.defaultBlockState(), 3);
                             usedItem = true;
                         }
-                        else if (itemstack.getItem() == Item.byBlock(Blocks.CACTUS) && this.currentTask == Task.PLANT_CACTUS)
+                        else if (itemstack.getItem() == Items.CACTUS && this.currentTask == Task.PLANT_CACTUS)
                         {
                             world.setBlock(blockpos, Blocks.CACTUS.defaultBlockState(), 3);
                             usedItem = true;
@@ -274,7 +274,7 @@ public class HayGolemHarvestAI extends Goal
                             || itemStack.getItem() == Items.CARROT
                             || itemStack.getItem() == Items.BEETROOT_SEEDS
                             || itemStack.getItem() == Items.SUGAR_CANE
-                            || itemStack.getItem() == Item.byBlock(Blocks.CACTUS)))
+                            || itemStack.getItem() == Items.CACTUS))
                     {
                         for (int n = 0; n < itemhandler.getSlots(); n++)
                         {
@@ -286,7 +286,7 @@ public class HayGolemHarvestAI extends Goal
                             }
                         }
                     }
-                    else if (itemStack.getItem() == Items.SUGAR_CANE || itemStack.getItem() == Item.byBlock(Blocks.CACTUS) && !flagCactusReeds)
+                    else if (itemStack.getItem() == Items.SUGAR_CANE || itemStack.getItem() == Items.CACTUS && !flagCactusReeds)
                     {
                         for (int n = 0; n < itemhandler.getSlots(); n++)
                         {
@@ -423,7 +423,7 @@ public class HayGolemHarvestAI extends Goal
                 this.currentTask = Task.HARVEST_CACTUS;
                 moveToFlag = true;
             }
-            if (topBlockState.getMaterial() == Material.AIR && this.hayGolem.hasItem(Item.byBlock(Blocks.CACTUS)) && (this.currentTask == Task.IDLING || this.currentTask == Task.PLANT_CACTUS))
+            if (topBlockState.getMaterial() == Material.AIR && this.hayGolem.hasItem(Items.CACTUS) && (this.currentTask == Task.IDLING || this.currentTask == Task.PLANT_CACTUS))
             {
                 this.currentTask = Task.PLANT_CACTUS;
                 moveToFlag = true;
