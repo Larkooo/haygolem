@@ -61,8 +61,9 @@ public class HayGolemEntity extends AbstractGolem {
     }
 
 
+    // farm uuid
     @Nullable
-    public Farm farm;
+    public UUID farm;
 
     private SimpleContainer inventory;
 
@@ -231,8 +232,10 @@ public class HayGolemEntity extends AbstractGolem {
             this.spawnAtLocation(itemStack);
         }
 
-        if (this.farm != null)
-            this.farm.workersCount--;
+        if (FarmManager.findByUuid(farm) != null)
+        {
+            FarmManager.findByUuid(farm).golemsCount--;
+        }
     }
 
     @Override
@@ -266,7 +269,7 @@ public class HayGolemEntity extends AbstractGolem {
         data.put("Inventory", this.inventory.createTag());
         // farm
         if (this.farm != null)
-            data.putString("farm", this.farm.getUuid().toString());
+            data.putString("farm", farm.toString());
     }
 
     public void readAdditionalSaveData(CompoundTag data) {
@@ -277,9 +280,11 @@ public class HayGolemEntity extends AbstractGolem {
 
         try
         {
-            this.farm = FarmManager.findByUuid(UUID.fromString(data.getString("farm")));
-            if (this.farm != null)
-                this.farm.workersCount++;
+            this.farm = UUID.fromString(data.getString("farm"));
+            if (FarmManager.findByUuid(this.farm) != null)
+            {
+                FarmManager.findByUuid(this.farm).golemsCount--;
+            }
         }
         catch (IllegalArgumentException e)
         {

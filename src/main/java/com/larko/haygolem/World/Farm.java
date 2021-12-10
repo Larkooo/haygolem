@@ -1,9 +1,12 @@
 package com.larko.haygolem.World;
 
+import com.larko.haygolem.Entity.HayGolemEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,14 +14,13 @@ import java.util.UUID;
 
 public class Farm {
     UUID uuid;
+    UUID ownerUuid;
 
     private BlockPos startingPos;
     private Vec3i size;
-    public int workersCount = 0;
-
     private int dimensionId;
 
-    UUID ownerUuid;
+    public int golemsCount = 0;
 
     public List<BlockPos> focusedBlocks = new ArrayList<>();
 

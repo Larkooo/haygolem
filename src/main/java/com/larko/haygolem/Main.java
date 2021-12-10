@@ -11,6 +11,8 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -57,7 +59,7 @@ public class Main
     {
         // some preinit code
         PacketHandler.registerMessages("farmgui");
-        ItemBlockRenderTypes.setRenderLayer(RegistryHandler.farmMarkerBlock, RenderType.cutout());
+        Main.proxy.setup();
     }
 
     @SubscribeEvent

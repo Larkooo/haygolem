@@ -1,6 +1,7 @@
 package com.larko.haygolem.Managers;
 
 import com.larko.haygolem.Block.FarmMarkerBlock;
+import com.larko.haygolem.Entity.HayGolemEntity;
 import com.larko.haygolem.Serializers.FarmSerializer;
 import com.larko.haygolem.Util.Metadata;
 import com.larko.haygolem.World.Farm;
@@ -15,6 +16,7 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 @Mod.EventBusSubscriber(modid= Metadata.MODID)
@@ -107,7 +109,7 @@ public class FarmManager {
         FarmSerializer.get(event.getWorld().getServer()).setDirty();
     }
 
-    public static Farm findByUuid(UUID uuid)
+    public static Farm findByUuid(@Nullable UUID uuid)
     {
         for (Farm farm : farms)
         {

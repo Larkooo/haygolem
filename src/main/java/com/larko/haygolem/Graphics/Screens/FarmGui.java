@@ -78,9 +78,9 @@ public class FarmGui extends Screen
             MultiLineLabel.create(this.font, new TextComponent("Owner : ").append(farmOwner.getDisplayName()))
                     .renderLeftAlignedNoShadow(p_95943_, i, j, 9, 5197647);
 
-        MultiLineLabel.create(this.font, new TextComponent("Assigned hay golems : " + this.farm.workersCount))
+        MultiLineLabel.create(this.font, new TextComponent("Assigned hay golems : " + this.farm.golemsCount))
                 .renderLeftAlignedNoShadow(p_95943_, i, j+12, 9, 5197647);
-        for (int n = 0; n < this.farm.workersCount; n++)
+        for (int n = 0; n < this.farm.golemsCount; n++)
         {
             InventoryScreen.renderEntityInInventory((n * 30) + i + 20, j + 100, 17, (float)(i + 51) - mouseX, (float)(j + 75 - 50) - mouseY, RegistryHandler.HAY_GOLEM.get().create(this.minecraft.level));
         }

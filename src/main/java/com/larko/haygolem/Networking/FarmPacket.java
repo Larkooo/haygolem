@@ -43,7 +43,7 @@ public class FarmPacket {
                 buf.readInt()
         );
 
-        this.farm.workersCount = buf.readInt();
+        this.farm.golemsCount = buf.readInt();
     }
 
     public void write(FriendlyByteBuf buf) {
@@ -62,7 +62,7 @@ public class FarmPacket {
             buf.writeInt(d);
 
         // number of workers
-        buf.writeInt(this.farm.workersCount);
+        buf.writeInt(this.farm.golemsCount);
     }
 
     public void handle(Supplier<NetworkEvent.Context> ctx) {

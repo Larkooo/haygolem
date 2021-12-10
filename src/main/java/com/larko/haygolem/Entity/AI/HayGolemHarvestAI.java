@@ -1,6 +1,7 @@
 package com.larko.haygolem.Entity.AI;
 
 import com.larko.haygolem.Entity.HayGolemEntity;
+import com.larko.haygolem.Managers.FarmManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -66,7 +67,7 @@ public class HayGolemHarvestAI extends Goal
         else
         {
             this.runDelay = 10 + this.hayGolem.getRandom().nextInt(10);
-            return this.hayGolem.farm != null && this.searchForDestination();
+            return FarmManager.findByUuid(this.hayGolem.farm) != null && this.searchForDestination();
         }
     }
 
@@ -76,7 +77,7 @@ public class HayGolemHarvestAI extends Goal
         //if (this.currentTask == Task.IDLING && this.hayGolem.farm.focusedBlocks.contains(this.destinationBlock))
         //    this.hayGolem.farm.focusedBlocks.remove(this.destinationBlock);
 
-        return this.hayGolem.farm != null && this.currentTask != Task.IDLING && this.timeoutCounter >= -this.maxStayTicks && this.timeoutCounter <= 1200 && this.shouldMoveTo(this.hayGolem.level, this.destinationBlock);
+        return FarmManager.findByUuid(this.hayGolem.farm) != null && this.currentTask != Task.IDLING && this.timeoutCounter >= -this.maxStayTicks && this.timeoutCounter <= 1200 && this.shouldMoveTo(this.hayGolem.level, this.destinationBlock);
     }
 
     @Override
@@ -109,7 +110,6 @@ public class HayGolemHarvestAI extends Goal
 
         if (this.closeToDestination)
         {
-            this.hayGolem.farm.focusedBlocks.remove(this.destinationBlock);
             this.hayGolem.getLookControl().setLookAt((double)this.destinationBlock.getX() + 0.5D, (double)(this.destinationBlock.getY() + 1), (double)this.destinationBlock.getZ() + 0.5D, 10.0F, (float)this.hayGolem.getMaxHeadXRot());
 
             Level world = this.hayGolem.level;
@@ -305,6 +305,7 @@ public class HayGolemHarvestAI extends Goal
                 }
             }
 
+            FarmManager.findByUuid(this.hayGolem.farm).focusedBlocks.remove(this.destinationBlock);
             this.currentTask = Task.IDLING;
             this.runDelay = 10;
         }
@@ -317,9 +318,9 @@ public class HayGolemHarvestAI extends Goal
 
     private boolean searchForDestination()
     {
-        BlockPos startingPos = this.hayGolem.farm.getStartingPos();
-        Vec3i farmSize = this.hayGolem.farm.getSize();
-        BlockPos endingPos = startingPos.offset(this.hayGolem.farm.getSize());
+        BlockPos startingPos = FarmManager.findByUuid(this.hayGolem.farm).getStartingPos();
+        Vec3i farmSize = FarmManager.findByUuid(this.hayGolem.farm).getSize();
+        BlockPos endingPos = startingPos.offset(FarmManager.findByUuid(this.hayGolem.farm).getSize());
 
         for (int x = startingPos.getX(); farmSize.getX() < 0 ? x >= endingPos.getX() : x <= endingPos.getX(); x += farmSize.getX() < 0 ? -1 : 1)
         {
@@ -329,10 +330,10 @@ public class HayGolemHarvestAI extends Goal
                 {
                     BlockPos pos = new BlockPos(x, y, z);
 
-                    if (this.shouldMoveTo(this.hayGolem.level, pos) && !this.hayGolem.farm.focusedBlocks.contains(pos))
+                    if (!FarmManager.findByUuid(this.hayGolem.farm).focusedBlocks.contains(pos) && this.shouldMoveTo(this.hayGolem.level, pos))
                     {
                         this.destinationBlock = pos;
-                        this.hayGolem.farm.focusedBlocks.add(this.destinationBlock);
+                        FarmManager.findByUuid(this.hayGolem.farm).focusedBlocks.add(this.destinationBlock);
                         return true;
                     }
                 }
