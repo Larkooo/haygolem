@@ -3,14 +3,10 @@ package com.larko.haygolem.Entity;
 import com.larko.haygolem.Entity.AI.HayGolemHarvestAI;
 import com.larko.haygolem.Entity.AI.HayGolemSearchFarmAI;
 import com.larko.haygolem.Managers.FarmManager;
-import com.larko.haygolem.World.Farm;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
-import net.minecraft.world.ContainerListener;
+
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -26,8 +22,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;

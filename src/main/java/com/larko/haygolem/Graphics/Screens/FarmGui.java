@@ -47,7 +47,7 @@ public class FarmGui extends Screen
     {
         int i = -16;
         this.addRenderableWidget(new Button(this.width / 2 - 116, this.height / 2 + 62 + -16, 228, 20, new TextComponent("Done"), (p_95948_) -> {
-            this.minecraft.setScreen((Screen)null);
+            this.minecraft.setScreen(null);
             this.minecraft.mouseHandler.grabMouse();
         }));
     }
@@ -89,9 +89,9 @@ public class FarmGui extends Screen
         Vec3i farmSize = this.farm.getSize();
         BlockPos endingPos = startingPos.offset(this.farm.getSize());
 
+        // count number of chests and crops
         int chests = 0;
         int crops = 0;
-
         for (int x = startingPos.getX(); farmSize.getX() < 0 ? x >= endingPos.getX() : x <= endingPos.getX(); x += farmSize.getX() < 0 ? -1 : 1)
         {
             for (int y = startingPos.getY() - 1; farmSize.getY() < 0 ? y >= endingPos.getY() : y <= endingPos.getY(); y += farmSize.getY() < 0 ? -1 : 1)

@@ -31,6 +31,6 @@ public class PacketHandler {
 
     public static void registerMessages() {
         // register messages sent from server to client
-        INSTANCE.registerMessage(packetId, FarmPacket.class, FarmPacket::write, FarmPacket::new, FarmPacket::handle);
+        INSTANCE.registerMessage(nextID(), FarmPacket.class, FarmPacket::write, FarmPacket::new, FarmPacket::handle);
     }
 }

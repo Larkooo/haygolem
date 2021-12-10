@@ -79,9 +79,8 @@ public class FarmManager {
                 new Vec3i(sizeX, sizeY, sizeZ),
                 dimensionId
                 ));
+
         FarmSerializer.get(event.getWorld().getServer()).setDirty();
-
-
     }
 
     // delete destroyed farm boundaries

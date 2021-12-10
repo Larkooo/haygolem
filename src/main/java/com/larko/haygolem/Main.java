@@ -73,10 +73,4 @@ public class Main
             LOGGER.info("farms deserialized");
         }
     }
-
-//    @SubscribeEvent
-//    public void onServerStop(ServerStoppingEvent event) {
-//        //FarmSerializer.get(event.getServer().overworld());
-//        LOGGER.info("farms serialized");
-//    }
 }
